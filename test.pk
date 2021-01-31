@@ -1,0 +1,59 @@
+module TEST
+
+import OTHER_MODULE
+MODULE_2 = import ANOTHER_MODULE
+. += import MATH
+
+type vector_3_int {
+    int x;
+    int y;
+    int z;
+
+    opt int magnitude() {
+        return sqrt(x * x + y * y + z * z);
+    }
+}
+
+type const_vec3 {
+    private {
+        int _x, _y, _z;
+    }
+
+    opt const int& x {
+        return _x;
+    }
+
+    opt const int& y {
+        return _y;
+    }
+
+    opt const int& z {
+        return _z;
+    }
+}
+
+type vector_3<T> {
+    T x;
+    T y;
+    T z;
+}
+
+type pair<U, V> {
+    U first alias x;
+    V second alias y;
+}
+
+vector_3_int roundVector<T>(vector_3<T> arg) {
+    return {x: round(arg.x), y: round(arg.y), z: round(arg.z)};
+}
+
+null print(vector_3_int vec) {
+    print(vec.x, ", ", vec.y, ", ", vec.z);
+}
+
+null .main() {
+    print("strings\n");
+    print(8, '\n');;;; // Line breaks essentially unimportant besides comments
+    print(roundVector());
+
+}

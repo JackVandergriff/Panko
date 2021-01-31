@@ -1,0 +1,4 @@
+int my_int = 5;
+float wow = my_int;
+4 * (21 + my_int++);
+7 - wow;
