@@ -1,5 +1,17 @@
 int my_int = 5;
-float wow = 1.5;
-4 * (wow + my_int++);
-wow = 7.5;
-7 - wow;
+float wow = 1.0;
+{
+    4 * (wow + my_int++);
+    wow = 7.5;
+    7 - wow;
+}
+
+my_int; wow;
+my_int == wow;
+if (my_int > wow) {
+    wow = 1.0;
+} else {
+    wow = 2.0;
+}
+
+wow;

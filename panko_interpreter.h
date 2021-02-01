@@ -39,6 +39,7 @@ namespace panko::runtime {
         explicit Interpreter(const ast::AST& ast) : ast{ast} {}
 
         void run() {
+            std::cout << std::boolalpha;
             for (auto& file : ast.files) {
                 visitFile(file.get());
             }
@@ -50,7 +51,7 @@ namespace panko::runtime {
                     [](int i){std::cout << "Int: " << i << '\n';},
                     [](double d){std::cout << "Double: " << d << '\n';},
                     [](bool b){std::cout << "Bool: " << b << '\n';},
-                    [](auto any) {}
+                    [](auto any){std::cout << "Not a value\n";}
                 );
             }
 
@@ -178,6 +179,26 @@ namespace panko::runtime {
             auto& var = variables.at(assignment->variable);
             var = visit(assignment->expression.get());
             return var;
+        }
+
+        Value visitBlock(ast::Block *block) override {
+            for (auto& statement : block->statements) {
+                visit(statement.get());
+            }
+
+            return std::monostate{};
+        }
+
+        Value visitIfStatement(ast::IfStatement* if_stat) override {
+            for (auto& block : if_stat->if_blocks) {
+                if (std::get<bool>(visit(block.condition.get()).getVariant())) {
+                    visit(block.block.get());
+                    return std::monostate{};
+                }
+            }
+
+            visit(if_stat->else_block.get());
+            return std::monostate{};
         }
     };
 }

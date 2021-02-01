@@ -148,6 +148,7 @@ public:
 
     Func_declContext *func_decl();
     If_statementContext *if_statement();
+    BlockContext *block();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 

@@ -12,6 +12,7 @@ statement : expression SEMICLN #semi_statement
  | func_decl #block_statement
  | var_decl SEMICLN #semi_statement
  | if_statement #block_statement
+ | block #block_statement
  | return_statement SEMICLN #semi_statement;
 
 expression : OPAREN expression CPAREN #paren_expr

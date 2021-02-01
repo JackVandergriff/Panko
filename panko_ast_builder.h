@@ -31,6 +31,15 @@ namespace panko {
             return file;
         }
 
+        antlrcpp::Any visitBlock(PankoParser::BlockContext *context) override {
+            auto block = new ast::Block();
+            for (auto statement : context->statement()) {
+                block->statements.push_back(make_unique_any<ast::Statement>(visit(statement)));
+            }
+
+            return static_cast<ast::Node*>(block);
+        }
+
         antlrcpp::Any visitBlock_statement(PankoParser::Block_statementContext *context) override {
             return visitChildren(context);
         }
@@ -69,7 +78,23 @@ namespace panko {
             auto expr = new ast::BinaryOperatorExpression();
             auto op = context->binary_operator()->getText();
 
-            if (op == "+") {
+            if (op == "||") {
+                expr->op = ast::BinaryOperator::OR;
+            } else if (op == "&&") {
+                expr->op = ast::BinaryOperator::AND;
+            } else if (op == "==") {
+                expr->op = ast::BinaryOperator::EQ;
+            } else if (op == "!=") {
+                expr->op = ast::BinaryOperator::NEQ;
+            } else if (op == ">") {
+                expr->op = ast::BinaryOperator::GT;
+            } else if (op == "<") {
+                expr->op = ast::BinaryOperator::LT;
+            } else if (op == ">=") {
+                expr->op = ast::BinaryOperator::GTEQ;
+            } else if (op == "<=") {
+                expr->op = ast::BinaryOperator::LTEQ;
+            } else if (op == "+") {
                 expr->op = ast::BinaryOperator::ADD;
             } else if (op == "-") {
                 expr->op = ast::BinaryOperator::SUB;
@@ -77,6 +102,14 @@ namespace panko {
                 expr->op = ast::BinaryOperator::MUL;
             } else if (op == "/") {
                 expr->op = ast::BinaryOperator::DIV;
+            } else if (op == "%") {
+                expr->op = ast::BinaryOperator::MOD;
+            } else if (op == "^") {
+                expr->op = ast::BinaryOperator::XOR;
+            } else if (op == "&") {
+                expr->op = ast::BinaryOperator::BITAND;
+            } else if (op == "|") {
+                expr->op = ast::BinaryOperator::BITOR;
             }
 
             expr->lhs = make_unique_any<ast::Expression>(context->lhs->accept(this));
@@ -138,7 +171,14 @@ namespace panko {
         }
 
         antlrcpp::Any visitIf_statement(PankoParser::If_statementContext *context) override {
-            return antlrcpp::Any();
+            auto statement = new ast::IfStatement();
+            for(auto block : context->if_block()) {
+                auto& back = statement->if_blocks.emplace_back();
+                back.condition = make_unique_any<ast::Expression>(block->expression()->accept(this));
+                back.block = make_unique_any<ast::Block>(block->block()->accept(this));
+            }
+            statement->else_block = make_unique_any<ast::Block>(context->final->accept(this));
+            return static_cast<ast::Node*>(statement);
         }
 
         antlrcpp::Any visitIf_block(PankoParser::If_blockContext *context) override {

@@ -145,10 +145,14 @@ namespace panko::ast {
         bool increment{false};
     };
 
-    struct IfStatement {
-        std::unique_ptr<Block> if_block;
-        std::unique_ptr<Block> else_block;
+    struct IfBlock {
         std::unique_ptr<Expression> condition;
+        std::unique_ptr<Block> block;
+    };
+
+    struct IfStatement : Statement {
+        std::vector<IfBlock> if_blocks;
+        std::unique_ptr<Block> else_block;
     };
 
     struct ReturnStatement : Statement {

@@ -29,6 +29,7 @@ namespace panko::ast {
         virtual T visitIdentifier(Identifier*)=0;
         virtual T visitComplexAssignment(ComplexAssignment*)=0;
         virtual T visitSimpleAssignment(SimpleAssignment*)=0;
+        virtual T visitIfStatement(IfStatement*)=0;
 
         T visit(Node* node) { // Will dispatch to most specified type
             if (auto statement = dynamic_cast<Statement*>(node)) {
@@ -54,6 +55,8 @@ namespace panko::ast {
                     }
                 } else if (auto var_decl = dynamic_cast<VariableDeclaration*>(statement)) {
                     return visitVariableDeclaration(var_decl);
+                } else if (auto if_stat = dynamic_cast<IfStatement*>(statement)) {
+                    return visitIfStatement(if_stat);
                 } else {
                     return visitStatement(statement);
                 }
