@@ -89,7 +89,7 @@ namespace panko::util {
     template<class... Ts> visitor(Ts...) -> visitor<Ts...>;
 
     template<typename T>
-    concept Number = std::integral<T> || std::floating_point<T>;
+    concept Number = std::is_arithmetic_v<T>;
 
     template<typename Variant, typename... Args>
     auto visit(Variant&& variant, Args&&... lambdas) {
@@ -115,58 +115,58 @@ namespace panko::util {
     class invariant {
     private:
         std::variant<Ts...> variant;
-        const size_t index;
+        bool initialized{true};
     public:
         // Easy constructors, just delegate to std::variant
-        invariant() = delete;
+        invariant() : variant{}, initialized{false} {};
 
         template<typename T>
         requires (!std::is_same_v<std::remove_cvref_t<T>, invariant>)
-        constexpr invariant(T&& t) : variant{std::forward<T>(t)}, index{variant.index()} {}
+        constexpr invariant(T&& t) : variant{std::forward<T>(t)}{}
 
         template<typename T, typename... Args>
         constexpr explicit invariant(std::in_place_type_t<T>, Args&&... args) :
-            variant{std::in_place_type<T>, std::forward<Args>(args)...}, index{variant.index()} {};
+            variant{std::in_place_type<T>, std::forward<Args>(args)...}{};
 
         template<typename T, typename U, typename... Args>
         constexpr explicit invariant(std::in_place_type_t<T>, std::initializer_list<U>&& il, Args&&... args) :
-            variant{std::in_place_type<T>, std::forward<std::initializer_list<U>>(il), std::forward<Args>(args)...}, index{variant.index()} {};
+            variant{std::in_place_type<T>, std::forward<std::initializer_list<U>>(il), std::forward<Args>(args)...} {};
 
         template<std::size_t I, typename... Args>
         constexpr explicit invariant(std::in_place_index_t<I>, Args&&... args) :
-            variant{std::in_place_index<I>, std::forward<Args>(args)...}, index{variant.index()} {};
+            variant{std::in_place_index<I>, std::forward<Args>(args)...} {};
 
         template<std::size_t I, typename U, typename... Args>
         constexpr explicit invariant(std::in_place_index_t<I>, std::initializer_list<U>&& il, Args&&... args) :
-            variant{std::in_place_index<I>, std::forward<std::initializer_list<U>>(il), std::forward<Args>(args)...}, index{variant.index()} {};
+            variant{std::in_place_index<I>, std::forward<std::initializer_list<U>>(il), std::forward<Args>(args)...} {};
 
 
         // don't allow reassignment from incompatible type
         constexpr invariant(const invariant& other) = default;
         constexpr invariant& operator=(const invariant& other) {
-            variant = std::visit(
-                [](const auto& current, const auto& other){
-                    if constexpr (std::is_convertible_v<decltype(other), decltype(current)>) {
-                        auto converted = static_cast<std::remove_cvref_t<decltype(current)>>(other);
-
-                        if (converted != other) {
-                            throw InvariantAccessException("Cast caused value narrowing");
-                        }
-                        return std::variant<Ts...>{converted};
-                    } else {
-                        throw InvariantAccessException("Invariant types not convertible");
-                    }
-                },
-            variant, other.variant);
-
-            if (variant.index() != index) {
-                throw InvariantAccessException("Conversion failed");
+            if (initialized) {
+                std::visit(
+                        [](auto &current, const auto &other) {
+                            if constexpr (std::is_same_v<std::remove_cvref_t<decltype(other)>, std::remove_cvref_t<decltype(current)>>) {
+                                current = other;
+                            } else {
+                                throw InvariantAccessException("Invariant types not equivalent");
+                            }
+                        },
+                        variant, other.variant);
+            } else {
+                variant = other.variant;
+                initialized = true;
             }
 
             return *this;
         };
+
         constexpr invariant(invariant&&) noexcept =default;
-        constexpr invariant& operator=(invariant&&) noexcept =delete;
+        constexpr invariant& operator=(invariant&& other) noexcept { // Just calling copy assignment
+            *this = other;
+            return *this;
+        };
 
         template<typename T>
         requires (!std::is_same_v<std::remove_cvref_t<T>, invariant>)
@@ -174,6 +174,10 @@ namespace panko::util {
             invariant inv{std::forward<T>(t)};
             *this = inv;
             return *this;
+        }
+
+        const std::variant<Ts...>& getVariant() {
+            return variant;
         }
     };
 }

@@ -86,7 +86,10 @@ namespace panko {
         }
 
         antlrcpp::Any visitSimple_assignment(PankoParser::Simple_assignmentContext *context) override {
-            return antlrcpp::Any();
+            auto expr = new ast::SimpleAssignment();
+            expr->variable = built_ast.variables.hash(context->IDENTIFIER()->getText());
+            expr->expression = make_unique_any<ast::Expression>(context->expression()->accept(this));
+            return static_cast<ast::Node*>(expr);
         }
 
         antlrcpp::Any visitId_expr(PankoParser::Id_exprContext *context) override {

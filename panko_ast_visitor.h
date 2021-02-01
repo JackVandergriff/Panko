@@ -28,6 +28,7 @@ namespace panko::ast {
         virtual T visitVariableDeclaration(VariableDeclaration*)=0;
         virtual T visitIdentifier(Identifier*)=0;
         virtual T visitComplexAssignment(ComplexAssignment*)=0;
+        virtual T visitSimpleAssignment(SimpleAssignment*)=0;
 
         T visit(Node* node) { // Will dispatch to most specified type
             if (auto statement = dynamic_cast<Statement*>(node)) {
@@ -44,8 +45,10 @@ namespace panko::ast {
                         return visitUnaryOperatorExpression(unary_expr);
                     } else if (auto id = dynamic_cast<Identifier*>(expression)) {
                         return visitIdentifier(id);
-                    } else if (auto assn = dynamic_cast<ComplexAssignment*>(expression)) {
-                        return visitComplexAssignment(assn);
+                    } else if (auto assignment = dynamic_cast<ComplexAssignment*>(expression)) {
+                        return visitComplexAssignment(assignment);
+                    } else if (auto assignment = dynamic_cast<SimpleAssignment*>(expression)) {
+                        return visitSimpleAssignment(assignment);
                     } else {
                         return visitExpression(expression);
                     }
@@ -123,6 +126,10 @@ namespace panko::ast {
         }
 
         T visitComplexAssignment(ComplexAssignment *assignment) override {
+            return T();
+        }
+
+        T visitSimpleAssignment(SimpleAssignment* assignment) override {
             return T();
         }
     };

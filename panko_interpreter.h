@@ -10,11 +10,11 @@
 #include <iostream>
 #include <variant>
 
-namespace panko {
+namespace panko::runtime {
 
     struct ComplexValue;
 
-    using Value = std::variant<int, double, bool, std::monostate, ComplexValue>;
+    using Value = util::invariant<int, double, bool, std::monostate, ComplexValue>;
 
     struct ComplexValue {
         std::map<util::string_hash, Value> attributes;
@@ -23,8 +23,12 @@ namespace panko {
     Value constructValue(const ast::Type& type) {
         if (type.name == util::string_hash{"int"}) {
             return Value{std::in_place_type<int>};
+        } else if (type.name == util::string_hash{"float"}) {
+            return Value{std::in_place_type<double>};
+        } else if (type.name == util::string_hash{"bool"}) {
+            return Value{std::in_place_type<bool>};
         } else {
-            return {};
+            return std::monostate{};
         }
     }
 
@@ -42,7 +46,7 @@ namespace panko {
 
         Value visitFile(ast::File *file) override {
             for (auto& statement : file->statements) {
-                util::visit(visit(statement.get()),
+                util::visit(visit(statement.get()).getVariant(),
                     [](int i){std::cout << "Int: " << i << '\n';},
                     [](double d){std::cout << "Double: " << d << '\n';},
                     [](bool b){std::cout << "Bool: " << b << '\n';},
@@ -50,7 +54,7 @@ namespace panko {
                 );
             }
 
-            return {};
+            return std::monostate{};
         }
 
         Value visitBinaryOperatorExpression(ast::BinaryOperatorExpression *expression) override {
@@ -117,22 +121,18 @@ namespace panko {
                 },
                 int_float_lambda,
                 [](auto lhs, auto rhs){return Value{std::monostate{}};}
-            }, visit(expression->lhs.get()), visit(expression->rhs.get()));
+            }, visit(expression->lhs.get()).getVariant(), visit(expression->rhs.get()).getVariant());
         }
 
         Value visitUnaryOperatorExpression(ast::UnaryOperatorExpression* expression) override {
-            Value val;
-            int lhs = std::get<int>(visit(expression->lhs.get()));
+            int lhs = std::get<int>(visit(expression->lhs.get()).getVariant());
 
             switch (expression->op) {
                 case ast::UnaryOperator::BITNOT:
-                    val = ~lhs;
-                    break;
+                    return Value{~lhs};
                 case ast::UnaryOperator::NOT:
-                    break;
+                    return Value{!lhs};
             }
-
-            return val;
         }
 
         Value visitIntegerLiteral(ast::IntegerLiteral *literal) override {
@@ -160,7 +160,7 @@ namespace panko {
 
         Value visitComplexAssignment(ast::ComplexAssignment *assignment) override {
             auto& var = variables.at(assignment->variable);
-            var = util::visit(var,
+            var = util::visit(var.getVariant(),
                 [assignment](util::Number auto value){
                     if (assignment->increment) {
                         return Value{value + 1};
@@ -174,6 +174,11 @@ namespace panko {
             return var;
         }
 
+        Value visitSimpleAssignment(ast::SimpleAssignment *assignment) override {
+            auto& var = variables.at(assignment->variable);
+            var = visit(assignment->expression.get());
+            return var;
+        }
     };
 }
 

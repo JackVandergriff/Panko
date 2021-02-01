@@ -36,7 +36,7 @@ int main(int argc, const char* argv[]) {
     ASTBuilder builder;
     auto& ast = builder.appendFile(parser).getTree();
 
-    Interpreter interpreter{ast};
+    runtime::Interpreter interpreter{ast};
 
     interpreter.run();
 
