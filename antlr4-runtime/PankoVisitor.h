@@ -47,6 +47,8 @@ public:
 
     virtual antlrcpp::Any visitFloat_lit(PankoParser::Float_litContext *context) = 0;
 
+    virtual antlrcpp::Any visitBool_lit(PankoParser::Bool_litContext *context) = 0;
+
     virtual antlrcpp::Any visitTyped_identifier(PankoParser::Typed_identifierContext *context) = 0;
 
     virtual antlrcpp::Any visitType(PankoParser::TypeContext *context) = 0;
@@ -58,6 +60,8 @@ public:
     virtual antlrcpp::Any visitIf_statement(PankoParser::If_statementContext *context) = 0;
 
     virtual antlrcpp::Any visitIf_block(PankoParser::If_blockContext *context) = 0;
+
+    virtual antlrcpp::Any visitWhile_loop(PankoParser::While_loopContext *context) = 0;
 
     virtual antlrcpp::Any visitReturn_statement(PankoParser::Return_statementContext *context) = 0;
 

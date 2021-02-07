@@ -18,10 +18,9 @@ namespace panko::ast {
         virtual T visitBlock(Block*)=0;
         virtual T visitStatement(Statement*)=0;
         virtual T visitExpression(Expression*)=0;
-        virtual T visitVariable(Variable*)=0;
-        virtual T visitFunction(Function*)=0;
         virtual T visitIntegerLiteral(IntegerLiteral*)=0;
         virtual T visitFloatLiteral(FloatLiteral*)=0;
+        virtual T visitBoolLiteral(BoolLiteral*)=0;
         virtual T visitFunctionCall(FunctionCall*)=0;
         virtual T visitBinaryOperatorExpression(BinaryOperatorExpression*)=0;
         virtual T visitUnaryOperatorExpression(UnaryOperatorExpression*)=0;
@@ -30,6 +29,9 @@ namespace panko::ast {
         virtual T visitComplexAssignment(ComplexAssignment*)=0;
         virtual T visitSimpleAssignment(SimpleAssignment*)=0;
         virtual T visitIfStatement(IfStatement*)=0;
+        virtual T visitWhileLoop(WhileLoop*)=0;
+        virtual T visitReturnStatement(ReturnStatement*)=0;
+        virtual T visitFunctionDeclaration(FunctionDeclaration*)=0;
 
         T visit(Node* node) { // Will dispatch to most specified type
             if (auto statement = dynamic_cast<Statement*>(node)) {
@@ -38,6 +40,8 @@ namespace panko::ast {
                         return visitIntegerLiteral(int_lit);
                     } else if (auto float_lit = dynamic_cast<FloatLiteral *>(expression)) {
                         return visitFloatLiteral(float_lit);
+                    } else if (auto bool_lit = dynamic_cast<BoolLiteral *>(expression)) {
+                        return visitBoolLiteral(bool_lit);
                     } else if (auto func_call = dynamic_cast<FunctionCall *>(expression)) {
                         return visitFunctionCall(func_call);
                     } else if (auto binop_expr = dynamic_cast<BinaryOperatorExpression *>(expression)) {
@@ -55,17 +59,19 @@ namespace panko::ast {
                     }
                 } else if (auto var_decl = dynamic_cast<VariableDeclaration*>(statement)) {
                     return visitVariableDeclaration(var_decl);
+                } else if (auto func_decl = dynamic_cast<FunctionDeclaration*>(statement)) {
+                    return visitFunctionDeclaration(func_decl);
                 } else if (auto if_stat = dynamic_cast<IfStatement*>(statement)) {
                     return visitIfStatement(if_stat);
+                } else if (auto while_loop = dynamic_cast<WhileLoop*>(statement)) {
+                    return visitWhileLoop(while_loop);
+                } else if (auto return_stat = dynamic_cast<ReturnStatement*>(statement)) {
+                    return visitReturnStatement(return_stat);
                 } else {
                     return visitStatement(statement);
                 }
             } else if (auto block = dynamic_cast<Block*>(node)) {
                 return visitBlock(block);
-            } else if (auto variable = dynamic_cast<Variable*>(node)) {
-                return visitVariable(variable);
-            } else if (auto function = dynamic_cast<Function*>(node)) {
-                return visitFunction(function);
             } else if (auto file = dynamic_cast<File*>(node)) {
                 return visitFile(file);
             } else {
@@ -76,11 +82,11 @@ namespace panko::ast {
 
     template<typename T>
     struct BaseVisitor : Visitor<T> {
-        T visitFile(File *file) override {
+        T visitFile(File*) override {
             return T();
         }
 
-        T visitBlock(Block *block) override {
+        T visitBlock(Block*) override {
             return T();
         }
 
@@ -92,47 +98,51 @@ namespace panko::ast {
             return this->visit(expression);
         }
 
-        T visitVariable(Variable *variable) override {
+        T visitIntegerLiteral(IntegerLiteral*) override {
             return T();
         }
 
-        T visitFunction(Function *function) override {
+        T visitFloatLiteral(FloatLiteral*) override {
             return T();
         }
 
-        T visitIntegerLiteral(IntegerLiteral *literal) override {
+        T visitBoolLiteral(BoolLiteral*) override {
             return T();
         }
 
-        T visitFloatLiteral(FloatLiteral *literal) override {
+        T visitFunctionCall(FunctionCall*) override {
             return T();
         }
 
-        T visitFunctionCall(FunctionCall *call) override {
+        T visitBinaryOperatorExpression(BinaryOperatorExpression*) override {
             return T();
         }
 
-        T visitBinaryOperatorExpression(BinaryOperatorExpression *expression) override {
+        T visitUnaryOperatorExpression(UnaryOperatorExpression*) override {
             return T();
         }
 
-        T visitUnaryOperatorExpression(UnaryOperatorExpression *expression) override {
+        T visitIdentifier(Identifier*) override {
             return T();
         }
 
-        T visitIdentifier(Identifier *identifier) override {
+        T visitVariableDeclaration(VariableDeclaration*) override {
             return T();
         }
 
-        T visitVariableDeclaration(VariableDeclaration *var_decl) override {
+        T visitComplexAssignment(ComplexAssignment*) override {
             return T();
         }
 
-        T visitComplexAssignment(ComplexAssignment *assignment) override {
+        T visitSimpleAssignment(SimpleAssignment*) override {
             return T();
         }
 
-        T visitSimpleAssignment(SimpleAssignment* assignment) override {
+        T visitWhileLoop(WhileLoop*) override {
+            return T();
+        }
+
+        T visitFunctionDeclaration(FunctionDeclaration*) override {
             return T();
         }
     };

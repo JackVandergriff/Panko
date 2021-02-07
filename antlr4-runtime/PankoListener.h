@@ -56,6 +56,9 @@ public:
   virtual void enterFloat_lit(PankoParser::Float_litContext *ctx) = 0;
   virtual void exitFloat_lit(PankoParser::Float_litContext *ctx) = 0;
 
+  virtual void enterBool_lit(PankoParser::Bool_litContext *ctx) = 0;
+  virtual void exitBool_lit(PankoParser::Bool_litContext *ctx) = 0;
+
   virtual void enterTyped_identifier(PankoParser::Typed_identifierContext *ctx) = 0;
   virtual void exitTyped_identifier(PankoParser::Typed_identifierContext *ctx) = 0;
 
@@ -73,6 +76,9 @@ public:
 
   virtual void enterIf_block(PankoParser::If_blockContext *ctx) = 0;
   virtual void exitIf_block(PankoParser::If_blockContext *ctx) = 0;
+
+  virtual void enterWhile_loop(PankoParser::While_loopContext *ctx) = 0;
+  virtual void exitWhile_loop(PankoParser::While_loopContext *ctx) = 0;
 
   virtual void enterReturn_statement(PankoParser::Return_statementContext *ctx) = 0;
   virtual void exitReturn_statement(PankoParser::Return_statementContext *ctx) = 0;

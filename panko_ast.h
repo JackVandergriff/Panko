@@ -11,6 +11,7 @@
 
 #include "PankoBaseVisitor.h"
 #include "panko_util.h"
+#include "panko_scope.h"
 
 namespace panko::ast {
 
@@ -52,7 +53,7 @@ namespace panko::ast {
         explicit Type(const std::string& name): name{name} {}
     };
 
-    struct Variable : Node {
+    struct Variable {
         util::string_hash name;
         type_hash type{};
 
@@ -60,7 +61,7 @@ namespace panko::ast {
         Variable(util::string_hash name, type_hash type): name{name}, type{type} {}
     };
 
-    struct Function : Node {
+    struct Function {
         util::string_hash name;
 
         std::vector<Variable> parameters;
@@ -104,6 +105,10 @@ namespace panko::ast {
 
     struct FloatLiteral : Expression {
         double value{};
+    };
+
+    struct BoolLiteral : Expression {
+        bool value{};
     };
 
     struct FunctionCall : Expression {
@@ -155,11 +160,17 @@ namespace panko::ast {
         std::unique_ptr<Block> else_block;
     };
 
+    struct WhileLoop : Statement {
+        std::unique_ptr<Expression> condition;
+        std::unique_ptr<Block> body;
+    };
+
     struct ReturnStatement : Statement {
         std::unique_ptr<Expression> expression;
     };
 
     struct File : Node {
+        std::string module;
         std::vector<std::unique_ptr<Statement>> statements;
     };
 

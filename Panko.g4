@@ -2,28 +2,30 @@ grammar Panko;
 
 // PARSER RULES
 
-file : (statement)+ EOF;
+file : MODULE IDENTIFIER SEMICLN (statement)+ EOF;
 
 block : OBRACE (statement)* CBRACE;
 
-func_decl: ret_type=typed_identifier OPAREN (typed_identifier (COMMA typed_identifier)*)? CPAREN block;
+func_decl: ret_type=typed_identifier OPAREN (params+=typed_identifier (COMMA params+=typed_identifier)*)? CPAREN block;
 
 statement : expression SEMICLN #semi_statement
  | func_decl #block_statement
  | var_decl SEMICLN #semi_statement
  | if_statement #block_statement
+ | while_loop #block_statement
  | block #block_statement
  | return_statement SEMICLN #semi_statement;
 
 expression : OPAREN expression CPAREN #paren_expr
  | lhs=expression binary_operator rhs=expression #binary_expr
  | unary_operator expression #unary_expr
- | IDENTIFIER OPAREN argument_list CPAREN #func_expr
+ | IDENTIFIER OPAREN argument_list? CPAREN #func_expr
  | IDENTIFIER assignment_operator expression #simple_assignment
  | IDENTIFIER op=(INC | DEC) #complex_assignment
  | IDENTIFIER #id_expr
  | INTLIT #int_lit
- | FLOATLIT #float_lit;
+ | FLOATLIT #float_lit
+ | (TRUE | FALSE) #bool_lit;
 
 typed_identifier : type id=IDENTIFIER;
 
@@ -36,6 +38,8 @@ var_decl : typed_identifier (ASSIGN expression)?;
 if_statement : IF if_block (ELSE IF if_block)* (ELSE final=block)?;
 
 if_block : OPAREN expression CPAREN block;
+
+while_loop : WHILE OPAREN expression CPAREN block;
 
 return_statement : RETURN expression;
 

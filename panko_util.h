@@ -39,20 +39,20 @@ namespace panko::util {
     public:
         template<typename... Args>
         size_t make(Args&&... args) {
-            return std::hash<T>{}(*(lookup.template emplace(args...).first));
+            return std::hash<T>{}(*(lookup.template emplace(std::forward<Args>(args)...).first));
         }
 
         template<typename... Args>
         size_t hash(Args&&... args) {
-            return std::hash<T>{}(T{args...});
+            return std::hash<T>{}(T{std::forward<Args>(args)...});
         }
 
-        const T& get(size_t hash) const {
+        const T* get(size_t hash) const {
             const auto iter = lookup.template find(hash);
             if (iter == lookup.end()) {
-                throw "Out of bounds";
+                return nullptr;
             } else {
-                return *iter;
+                return &(*iter);
             }
         }
     };
@@ -176,8 +176,12 @@ namespace panko::util {
             return *this;
         }
 
-        const std::variant<Ts...>& getVariant() {
+        const std::variant<Ts...>& getVariant() const {
             return variant;
+        }
+
+        [[nodiscard]] size_t getIndex() const {
+            return variant.index();
         }
     };
 }

@@ -1,17 +1,32 @@
-int my_int = 5;
+module sample;
+
+int my_int = 1;
 float wow = 1.0;
+int triangle = 0;
+
 {
-    4 * (wow + my_int++);
-    wow = 7.5;
-    7 - wow;
+    int blocky = 2;
+    blocky + 5;
 }
 
-my_int; wow;
-my_int == wow;
-if (my_int > wow) {
-    wow = 1.0;
-} else {
-    wow = 2.0;
+blocky + 5;
+
+int my_func() {
+    if (wow > 2.0) {
+        return triangle;
+    }
+
+    while(my_int < 99) {
+        triangle = triangle + my_int;
+        my_int++;
+        if (triangle > 15) {
+            return triangle;
+        }
+    }
+
+    return 0;
 }
 
-wow;
+my_func();
+
+triangle;

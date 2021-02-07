@@ -13,8 +13,13 @@
 namespace panko::runtime {
 
     struct ComplexValue;
+    struct ReturnValue;
 
-    using Value = util::invariant<int, double, bool, std::monostate, ComplexValue>;
+    struct Returning {};
+
+    using Null = std::monostate;
+    using Value = util::invariant<int, double, bool, Null, ComplexValue, Returning>;
+    using WeakValue = std::variant<int, double, bool, Null, ComplexValue, Returning>;
 
     struct ComplexValue {
         std::map<util::string_hash, Value> attributes;
@@ -35,6 +40,7 @@ namespace panko::runtime {
     struct Interpreter : ast::BaseVisitor<Value> {
         const ast::AST& ast;
         std::map<ast::variable_hash, Value> variables;
+        WeakValue return_value;
 
         explicit Interpreter(const ast::AST& ast) : ast{ast} {}
 
@@ -51,7 +57,8 @@ namespace panko::runtime {
                     [](int i){std::cout << "Int: " << i << '\n';},
                     [](double d){std::cout << "Double: " << d << '\n';},
                     [](bool b){std::cout << "Bool: " << b << '\n';},
-                    [](auto any){std::cout << "Not a value\n";}
+                    [](Returning){std::cout << "Return value\n";},
+                    [](auto){std::cout << "Not a value\n";}
                 );
             }
 
@@ -121,7 +128,7 @@ namespace panko::runtime {
                     }
                 },
                 int_float_lambda,
-                [](auto lhs, auto rhs){return Value{std::monostate{}};}
+                [](auto, auto){return Value{std::monostate{}};}
             }, visit(expression->lhs.get()).getVariant(), visit(expression->rhs.get()).getVariant());
         }
 
@@ -144,9 +151,25 @@ namespace panko::runtime {
             return Value{literal->value};
         }
 
+        Value visitBoolLiteral(ast::BoolLiteral* literal) override {
+            return Value{literal->value};
+        }
+
         Value visitVariableDeclaration(ast::VariableDeclaration *var_decl) override {
-            const auto& var = ast.variables.get(var_decl->variable);
-            variables.emplace(var_decl->variable, constructValue(ast.types.get(var.type)));
+            auto var = ast.variables.get(var_decl->variable);
+            if (var) {
+                auto type = ast.types.get(var->type);
+                if (type) {
+                    variables.emplace(var_decl->variable, constructValue(*type));
+                } else {
+                    std::cerr << "TYPE NOT FOUND!";
+                    std::terminate();
+                }
+            } else {
+                std::cerr << "VARIABLE NOT FOUND!";
+                std::terminate();
+            }
+
             if (auto assignment = var_decl->assignment.get()) {
                 variables.at(var_decl->variable) = visit(assignment);
                 return variables.at(var_decl->variable);
@@ -169,7 +192,7 @@ namespace panko::runtime {
                         return Value{value - 1};
                     }
                 },
-                [](auto value){return Value{std::monostate{}};}
+                [](auto){return Value{std::monostate{}};}
             );
 
             return var;
@@ -183,7 +206,9 @@ namespace panko::runtime {
 
         Value visitBlock(ast::Block *block) override {
             for (auto& statement : block->statements) {
-                visit(statement.get());
+                if (std::holds_alternative<Returning>(visit(statement.get()).getVariant())) {
+                    return Returning{};
+                }
             }
 
             return std::monostate{};
@@ -192,13 +217,58 @@ namespace panko::runtime {
         Value visitIfStatement(ast::IfStatement* if_stat) override {
             for (auto& block : if_stat->if_blocks) {
                 if (std::get<bool>(visit(block.condition.get()).getVariant())) {
-                    visit(block.block.get());
-                    return std::monostate{};
+                    if (std::holds_alternative<Returning>(visit(block.block.get()).getVariant())) {
+                        return Returning{};
+                    } else {
+                        return std::monostate{};
+                    }
                 }
             }
 
-            visit(if_stat->else_block.get());
+            if (if_stat->else_block.get() && std::holds_alternative<Returning>(visit(if_stat->else_block.get()).getVariant())) {
+                return Returning{};
+            } else {
+                return std::monostate{};
+            }
+        }
+
+        Value visitWhileLoop(ast::WhileLoop* loop) override {
+            while (std::get<bool>(visit(loop->condition.get()).getVariant())) {
+                if (std::holds_alternative<Returning>(visit(loop->body.get()).getVariant())) {
+                    return Returning{};
+                }
+            }
+
             return std::monostate{};
+        }
+
+        Value visitReturnStatement(ast::ReturnStatement* return_stat) override {
+            return_value = visit(return_stat->expression.get()).getVariant();
+            return Returning{};
+        }
+
+        Value visitFunctionDeclaration(ast::FunctionDeclaration *) override {
+            return std::monostate{};
+        }
+
+        Value visitFunctionCall(ast::FunctionCall* call) override {
+            auto func = ast.functions.get(call->function);
+            Value ret_val;
+
+            if (func) {
+                auto type = ast.types.get(func->return_type);
+
+                if (type) {
+                    ret_val = constructValue(*type);
+                }
+            }
+            // TODO function parameters
+
+            visit(func->body.get());
+            ret_val = return_value;
+
+            return_value = std::monostate{};
+            return ret_val;
         }
     };
 }

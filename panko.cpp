@@ -10,7 +10,7 @@ using namespace std;
 using namespace antlr4;
 using namespace panko;
 
-int main(int argc, const char* argv[]) {
+int main() {
     std::ifstream stream;
     //std::cout << "[---] Open file: ";
     std::filesystem::path path{"../sample.pk"};

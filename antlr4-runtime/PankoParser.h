@@ -26,9 +26,9 @@ public:
   enum {
     RuleFile = 0, RuleBlock = 1, RuleFunc_decl = 2, RuleStatement = 3, RuleExpression = 4, 
     RuleTyped_identifier = 5, RuleType = 6, RuleArgument_list = 7, RuleVar_decl = 8, 
-    RuleIf_statement = 9, RuleIf_block = 10, RuleReturn_statement = 11, 
-    RuleBuiltin_type = 12, RuleBinary_operator = 13, RuleUnary_operator = 14, 
-    RuleAssignment_operator = 15
+    RuleIf_statement = 9, RuleIf_block = 10, RuleWhile_loop = 11, RuleReturn_statement = 12, 
+    RuleBuiltin_type = 13, RuleBinary_operator = 14, RuleUnary_operator = 15, 
+    RuleAssignment_operator = 16
   };
 
   explicit PankoParser(antlr4::TokenStream *input);
@@ -52,6 +52,7 @@ public:
   class Var_declContext;
   class If_statementContext;
   class If_blockContext;
+  class While_loopContext;
   class Return_statementContext;
   class Builtin_typeContext;
   class Binary_operatorContext;
@@ -62,6 +63,9 @@ public:
   public:
     FileContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *MODULE();
+    antlr4::tree::TerminalNode *IDENTIFIER();
+    antlr4::tree::TerminalNode *SEMICLN();
     antlr4::tree::TerminalNode *EOF();
     std::vector<StatementContext *> statement();
     StatementContext* statement(size_t i);
@@ -96,6 +100,8 @@ public:
   class  Func_declContext : public antlr4::ParserRuleContext {
   public:
     PankoParser::Typed_identifierContext *ret_type = nullptr;
+    PankoParser::Typed_identifierContext *typed_identifierContext = nullptr;
+    std::vector<Typed_identifierContext *> params;
     Func_declContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *OPAREN();
@@ -148,6 +154,7 @@ public:
 
     Func_declContext *func_decl();
     If_statementContext *if_statement();
+    While_loopContext *while_loop();
     BlockContext *block();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -254,8 +261,8 @@ public:
 
     antlr4::tree::TerminalNode *IDENTIFIER();
     antlr4::tree::TerminalNode *OPAREN();
-    Argument_listContext *argument_list();
     antlr4::tree::TerminalNode *CPAREN();
+    Argument_listContext *argument_list();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 
@@ -278,6 +285,18 @@ public:
     Float_litContext(ExpressionContext *ctx);
 
     antlr4::tree::TerminalNode *FLOATLIT();
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  Bool_litContext : public ExpressionContext {
+  public:
+    Bool_litContext(ExpressionContext *ctx);
+
+    antlr4::tree::TerminalNode *TRUE();
+    antlr4::tree::TerminalNode *FALSE();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 
@@ -393,6 +412,25 @@ public:
   };
 
   If_blockContext* if_block();
+
+  class  While_loopContext : public antlr4::ParserRuleContext {
+  public:
+    While_loopContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *WHILE();
+    antlr4::tree::TerminalNode *OPAREN();
+    ExpressionContext *expression();
+    antlr4::tree::TerminalNode *CPAREN();
+    BlockContext *block();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  While_loopContext* while_loop();
 
   class  Return_statementContext : public antlr4::ParserRuleContext {
   public:

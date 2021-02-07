@@ -71,6 +71,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitBool_lit(PankoParser::Bool_litContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitTyped_identifier(PankoParser::Typed_identifierContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -92,6 +96,10 @@ public:
   }
 
   virtual antlrcpp::Any visitIf_block(PankoParser::If_blockContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitWhile_loop(PankoParser::While_loopContext *ctx) override {
     return visitChildren(ctx);
   }
 
