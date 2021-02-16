@@ -17,30 +17,28 @@ namespace panko {
     class ASTBuilder : PankoBaseVisitor {
     private:
         ast::AST built_ast{};
-        scope::Context cur_context;
+        scope::Context ast_context;
 
         antlrcpp::Any visitFile(PankoParser::FileContext *context) override {
             auto file = new ast::File();
 
             file->module = context->IDENTIFIER()->getText();
-            cur_context.push(scope::Type::MODULE, file->module);
+            auto pop = ast_context.push_local(file->module);
 
             for (auto& statement : context->statement()) {
                 file->statements.push_back(make_unique_any<ast::Statement>(statement->accept(this)));
             }
 
-            cur_context.pop();
             return file;
         }
 
         antlrcpp::Any visitBlock(PankoParser::BlockContext *context) override {
             auto block = new ast::Block();
-            cur_context.push(scope::Type::BLOCK);
+            auto pop = ast_context.push_unique_local("B");
             for (auto statement : context->statement()) {
                 block->statements.push_back(make_unique_any<ast::Statement>(visit(statement)));
             }
 
-            cur_context.pop();
             return static_cast<ast::Node*>(block);
         }
 
@@ -54,22 +52,21 @@ namespace panko {
 
         antlrcpp::Any visitFunc_decl(PankoParser::Func_declContext *context) override {
             auto decl = new ast::FunctionDeclaration();
-            ast::Function func{cur_context.mangle(context->ret_type->IDENTIFIER()->getText())};
-            func.return_type = std::get<size_t>(cur_context.lookup(context->ret_type->type()->getText(), built_ast.types));
+            ast::Function func{ast_context.mangle(context->ret_type->IDENTIFIER()->getText())};
+            auto pop = ast_context.push_local(static_cast<std::string>(context->ret_type->IDENTIFIER()->getText()));
+            func.return_type = {context->ret_type->type()->getText(), std::ref(ast_context)};
 
-            cur_context.push(scope::Type::FUNCTION, static_cast<std::string>(func.name));
             if (!context->params.empty()) {
                 for (auto param : context->params) {
                     func.parameters.emplace_back(
-                            util::string_hash{cur_context.mangle(param->IDENTIFIER()->getText())},
-                            std::get<size_t>(cur_context.lookup(param->type()->getText(), built_ast.types))
+                            util::string_hash{param->IDENTIFIER()->getText()},
+                            ast::Identifier{param->type()->getText(), ast_context}
                     );
                 }
             }
 
             func.body = make_unique_any<ast::Block>(context->block()->accept(this));
 
-            cur_context.pop();
             decl->function = built_ast.functions.make(std::move(func));
 
             return static_cast<ast::Node*>(decl);
@@ -92,7 +89,7 @@ namespace panko {
 
         antlrcpp::Any visitComplex_assignment(PankoParser::Complex_assignmentContext *context) override {
             auto expr = new ast::ComplexAssignment();
-            expr->variable = std::get<size_t>(cur_context.lookup(context->IDENTIFIER()->getText(), built_ast.variables));
+            expr->variable = {context->IDENTIFIER()->getText(), std::ref(ast_context)};
             expr->increment = context->op->getText() == "++";
             return static_cast<ast::Node*>(expr);
         }
@@ -143,20 +140,20 @@ namespace panko {
 
         antlrcpp::Any visitSimple_assignment(PankoParser::Simple_assignmentContext *context) override {
             auto expr = new ast::SimpleAssignment();
-            expr->variable = std::get<size_t>(cur_context.lookup(context->IDENTIFIER()->getText(), built_ast.variables));
+            expr->variable = {context->IDENTIFIER()->getText(), std::ref(ast_context)};
             expr->expression = make_unique_any<ast::Expression>(context->expression()->accept(this));
             return static_cast<ast::Node*>(expr);
         }
 
         antlrcpp::Any visitId_expr(PankoParser::Id_exprContext *context) override {
-            auto expr = new ast::Identifier();
-            expr->variable = std::get<size_t>(cur_context.lookup(context->IDENTIFIER()->getText(), built_ast.variables));
+            auto expr = new ast::VariableExpression();
+            expr->variable = {context->IDENTIFIER()->getText(), std::ref(ast_context)};
             return static_cast<ast::Node*>(expr);
         }
 
         antlrcpp::Any visitFunc_expr(PankoParser::Func_exprContext *context) override {
             auto expr = new ast::FunctionCall();
-            expr->function = std::get<size_t>(cur_context.lookup(context->IDENTIFIER()->getText(), built_ast.functions));
+            expr->function = {context->IDENTIFIER()->getText(), std::ref(ast_context)};
 
             if (context->argument_list()) {
                 for (auto param : context->argument_list()->expression()) {
@@ -182,8 +179,8 @@ namespace panko {
         antlrcpp::Any visitVar_decl(PankoParser::Var_declContext *context) override {
             auto expr = new ast::VariableDeclaration();
             expr->variable = built_ast.variables.make(
-                    cur_context.mangle(context->typed_identifier()->IDENTIFIER()->getText()),
-                    std::get<size_t>(cur_context.lookup(context->typed_identifier()->type()->getText(), built_ast.types))
+                    ast_context.mangle(context->typed_identifier()->IDENTIFIER()->getText()),
+                    ast::Identifier{context->typed_identifier()->type()->getText(), ast_context}
             );
             expr->assignment = make_unique_any<ast::Expression>(context->expression()->accept(this));
 

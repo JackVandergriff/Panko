@@ -10,9 +10,6 @@
 #include <vector>
 
 namespace panko::scope {
-    enum class Type {
-        MODULE, FUNCTION, TYPE, BLOCK
-    };
 
     struct HashFailure : util::Exception {
         using util::Exception::Exception;
@@ -22,32 +19,29 @@ namespace panko::scope {
     private:
         std::vector<std::string> context;
         static inline int id = 0;
-
-        static char getTypeChar(Type type) {
-            switch(type) {
-                case Type::MODULE:
-                    return 'M';
-                case Type::FUNCTION:
-                    return 'F';
-                case Type::TYPE:
-                    return 'T';
-                case Type::BLOCK:
-                    return 'B';
-            }
-        }
-
     public:
-        void push(Type type, const std::string& name) {
-            context.push_back(getTypeChar(type) + name);
-        }
-
-        void push(Type type) {
-            context.push_back(getTypeChar(type) + std::to_string(id++));
-        }
-
         void pop() {
             context.pop_back();
         }
+
+        void push(const std::string& name) {
+            context.push_back(name);
+        }
+
+        void push_unique(const std::string& name) {
+            context.push_back(name + std::to_string(id++));
+        }
+
+        util::Finally push_local(const std::string& name) {
+            push(name);
+            return util::Finally{[this](){pop();}};
+        }
+
+        util::Finally push_unique_local(const std::string& name) {
+            push_unique(name);
+            return util::Finally{[this](){pop();}};
+        }
+
 
         [[nodiscard]] std::string mangle(const std::string& name) const {
             std::string ret_val;
@@ -69,12 +63,11 @@ namespace panko::scope {
 
                 auto hash = std::hash<T>{}(T{ret_val + name});
                 if (auto ptr = hasher.get(hash)) {
-                    std::cout << "Name found: " << ret_val + name << '\n';
                     return {hash, ptr};
                 }
             }
 
-            throw HashFailure{"Unable to find qualified name in " + mangle(name)};
+            return {0, nullptr};
         }
     };
 }

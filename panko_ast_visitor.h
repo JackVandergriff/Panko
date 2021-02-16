@@ -25,7 +25,7 @@ namespace panko::ast {
         virtual T visitBinaryOperatorExpression(BinaryOperatorExpression*)=0;
         virtual T visitUnaryOperatorExpression(UnaryOperatorExpression*)=0;
         virtual T visitVariableDeclaration(VariableDeclaration*)=0;
-        virtual T visitIdentifier(Identifier*)=0;
+        virtual T visitVariableExpression(VariableExpression*)=0;
         virtual T visitComplexAssignment(ComplexAssignment*)=0;
         virtual T visitSimpleAssignment(SimpleAssignment*)=0;
         virtual T visitIfStatement(IfStatement*)=0;
@@ -48,8 +48,8 @@ namespace panko::ast {
                         return visitBinaryOperatorExpression(binop_expr);
                     } else if (auto unary_expr = dynamic_cast<UnaryOperatorExpression *>(expression)) {
                         return visitUnaryOperatorExpression(unary_expr);
-                    } else if (auto id = dynamic_cast<Identifier*>(expression)) {
-                        return visitIdentifier(id);
+                    } else if (auto var_expr = dynamic_cast<VariableExpression*>(expression)) {
+                        return visitVariableExpression(var_expr);
                     } else if (auto assignment = dynamic_cast<ComplexAssignment*>(expression)) {
                         return visitComplexAssignment(assignment);
                     } else if (auto assignment = dynamic_cast<SimpleAssignment*>(expression)) {
@@ -122,7 +122,7 @@ namespace panko::ast {
             return T();
         }
 
-        T visitIdentifier(Identifier*) override {
+        T visitVariableExpression(VariableExpression*) override {
             return T();
         }
 

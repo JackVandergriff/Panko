@@ -1,32 +1,19 @@
 module sample;
 
-int my_int = 1;
-float wow = 1.0;
-int triangle = 0;
-
-{
-    int blocky = 2;
-    blocky + 5;
+int bad_fib(int index) {
+    if (index < 2) {
+        return 1;
+    } else {
+        return bad_fib(index - 1) + bad_fib(index - 2);
+    }
 }
 
-blocky + 5;
-
-int my_func() {
-    if (wow > 2.0) {
-        return triangle;
-    }
-
-    while(my_int < 99) {
-        triangle = triangle + my_int;
-        my_int++;
-        if (triangle > 15) {
-            return triangle;
-        }
-    }
-
-    return 0;
-}
-
-my_func();
-
-triangle;
+bad_fib(0);
+bad_fib(1);
+bad_fib(2);
+bad_fib(3);
+bad_fib(4);
+bad_fib(5);
+bad_fib(6);
+bad_fib(7);
+bad_fib(8);

@@ -39,8 +39,10 @@ namespace panko::runtime {
 
     struct Interpreter : ast::BaseVisitor<Value> {
         const ast::AST& ast;
-        std::map<ast::variable_hash, Value> variables;
+        util::hasher<ast::Variable> params;
+        std::map<size_t, Value> values;
         WeakValue return_value;
+        size_t call_stack_size = 0;
 
         explicit Interpreter(const ast::AST& ast) : ast{ast} {}
 
@@ -48,6 +50,51 @@ namespace panko::runtime {
             std::cout << std::boolalpha;
             for (auto& file : ast.files) {
                 visitFile(file.get());
+            }
+        }
+
+        std::tuple<size_t, const ast::Variable*> findVariableAndHash(const ast::Identifier& id) {
+            auto var = id.context.lookup(id.identifier, ast.variables);
+
+            if (std::get<const ast::Variable*>(var)) {
+                return var;
+            } else {
+                size_t hash = std::hash<ast::Variable>{}(ast::Variable{id.identifier + std::to_string(call_stack_size)});
+                const auto ptr = params.get(hash);
+                if (ptr) {
+                    return {hash, ptr};
+                } else {
+                    return {0, nullptr};
+                }
+            }
+        }
+
+        const ast::Variable* findVariable(const ast::Identifier& id) {
+            return std::get<const ast::Variable*>(findVariableAndHash(id));
+        }
+
+        Value& findValue(const ast::Identifier& id) {
+            auto [hash, ptr] = findVariableAndHash(id);
+            if (ptr) {
+                return values.at(hash);
+            } else {
+                throw util::Exception("Value not found for identifier " + id.context.mangle(id.identifier));
+            }
+        }
+
+        const ast::Type* findType(const ast::Identifier& id) {
+            if (auto type = std::get<const ast::Type*>(id.context.lookup(id.identifier, ast.types))) {
+                return type;
+            } else {
+                return nullptr;
+            }
+        }
+
+        const ast::Function* findFunction(const ast::Identifier& id) {
+            if (auto func = std::get<const ast::Function*>(id.context.lookup(id.identifier, ast.functions))) {
+                return func;
+            } else {
+                return nullptr;
             }
         }
 
@@ -158,9 +205,9 @@ namespace panko::runtime {
         Value visitVariableDeclaration(ast::VariableDeclaration *var_decl) override {
             auto var = ast.variables.get(var_decl->variable);
             if (var) {
-                auto type = ast.types.get(var->type);
+                auto type = findType(var->type);
                 if (type) {
-                    variables.emplace(var_decl->variable, constructValue(*type));
+                    values.emplace(var_decl->variable, constructValue(*type));
                 } else {
                     std::cerr << "TYPE NOT FOUND!";
                     std::terminate();
@@ -171,19 +218,19 @@ namespace panko::runtime {
             }
 
             if (auto assignment = var_decl->assignment.get()) {
-                variables.at(var_decl->variable) = visit(assignment);
-                return variables.at(var_decl->variable);
+                values.at(var_decl->variable) = visit(assignment);
+                return values.at(var_decl->variable);
             } else {
                 return std::monostate{};
             }
         }
 
-        Value visitIdentifier(ast::Identifier *identifier) override {
-            return variables.at(identifier->variable);
+        Value visitVariableExpression(ast::VariableExpression *identifier) override {
+            return findValue(identifier->variable);
         }
 
         Value visitComplexAssignment(ast::ComplexAssignment *assignment) override {
-            auto& var = variables.at(assignment->variable);
+            auto& var = findValue(assignment->variable);
             var = util::visit(var.getVariant(),
                 [assignment](util::Number auto value){
                     if (assignment->increment) {
@@ -199,12 +246,13 @@ namespace panko::runtime {
         }
 
         Value visitSimpleAssignment(ast::SimpleAssignment *assignment) override {
-            auto& var = variables.at(assignment->variable);
+            auto& var = findValue(assignment->variable);
             var = visit(assignment->expression.get());
             return var;
         }
 
         Value visitBlock(ast::Block *block) override {
+
             for (auto& statement : block->statements) {
                 if (std::holds_alternative<Returning>(visit(statement.get()).getVariant())) {
                     return Returning{};
@@ -252,22 +300,43 @@ namespace panko::runtime {
         }
 
         Value visitFunctionCall(ast::FunctionCall* call) override {
-            auto func = ast.functions.get(call->function);
+            auto func = findFunction(call->function);
             Value ret_val;
 
             if (func) {
-                auto type = ast.types.get(func->return_type);
+                auto type = findType(func->return_type);
 
                 if (type) {
                     ret_val = constructValue(*type);
                 }
             }
-            // TODO function parameters
 
+            std::vector<size_t> param_hashes;
+            param_hashes.reserve(func->parameters.size());
+
+            for (size_t i = 0; i < func->parameters.size(); i++) {
+                const auto& cur = func->parameters.at(i);
+                values.emplace(
+                    param_hashes.emplace_back(params.make(
+                        // Have to use call_stack_size + 1 so visiting parameter expressions still work
+                        util::string_hash{static_cast<std::string>(cur.name) + std::to_string(call_stack_size + 1)},
+                        std::ref(cur.type)
+                    )),
+                    visit(call->arguments.at(i).get())
+                );
+            }
+
+            call_stack_size++;
+            auto dec = util::Finally{[this](){call_stack_size--;}};
             visit(func->body.get());
             ret_val = return_value;
 
             return_value = std::monostate{};
+
+            for (auto param : param_hashes) {
+                values.erase(param);
+            }
+
             return ret_val;
         }
     };

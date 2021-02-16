@@ -6,6 +6,7 @@
 #define PANKO_AST_H
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <functional>
 
@@ -14,10 +15,6 @@
 #include "panko_scope.h"
 
 namespace panko::ast {
-
-    using type_hash = size_t;
-    using variable_hash = size_t;
-    using function_hash = size_t;
 
     enum class BinaryOperator {
         OR, AND, EQ, NEQ, GT, LT, GTEQ, LTEQ, ADD, SUB, MUL, DIV, MOD, XOR, BITAND, BITOR
@@ -29,6 +26,11 @@ namespace panko::ast {
 
     struct Node {
         virtual ~Node() = default;
+    };
+
+    struct Identifier {
+        std::string identifier;
+        scope::Context context;
     };
 
     struct Statement : Node {
@@ -55,17 +57,17 @@ namespace panko::ast {
 
     struct Variable {
         util::string_hash name;
-        type_hash type{};
+        Identifier type;
 
         explicit Variable(const std::string& name): name{name} {}
-        Variable(util::string_hash name, type_hash type): name{name}, type{type} {}
+        Variable(util::string_hash name, Identifier type) : name{name}, type{std::move(type)} {}
     };
 
     struct Function {
         util::string_hash name;
 
         std::vector<Variable> parameters;
-        type_hash return_type{};
+        Identifier return_type;
         std::unique_ptr<Block> body;
 
         explicit Function(const std::string& name): name{name} {}
@@ -112,7 +114,7 @@ namespace panko::ast {
     };
 
     struct FunctionCall : Expression {
-        function_hash function;
+        Identifier function;
         std::vector<std::unique_ptr<Expression>> arguments;
     };
 
@@ -128,25 +130,25 @@ namespace panko::ast {
     };
 
     struct VariableDeclaration : Statement {
-        variable_hash variable{};
+        size_t variable;
         std::unique_ptr<Expression> assignment;
     };
 
     struct FunctionDeclaration : Statement {
-        function_hash function{};
+        size_t function{};
     };
 
-    struct Identifier : Expression {
-        variable_hash variable{};
+    struct VariableExpression : Expression {
+        Identifier variable;
     };
 
     struct SimpleAssignment : Expression {
-        variable_hash variable;
+        Identifier variable;
         std::unique_ptr<Expression> expression;
     };
 
     struct ComplexAssignment : Expression {
-        variable_hash variable{};
+        Identifier variable;
         bool increment{false};
     };
 
@@ -175,10 +177,10 @@ namespace panko::ast {
     };
 
     struct AST {
-        util::hasher<Type> types{};
+        util::hasher<Type> types;
         util::hasher<Variable> variables;
         util::hasher<Function> functions;
-        std::vector<std::unique_ptr<File>> files{};
+        std::vector<std::unique_ptr<File>> files;
     };
 }
 

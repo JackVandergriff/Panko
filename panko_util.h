@@ -184,6 +184,18 @@ namespace panko::util {
             return variant.index();
         }
     };
+
+    class Finally {
+    private:
+        std::function<void()> destructor;
+    public:
+        template<typename T> requires (!std::is_same_v<std::remove_cvref_t<T>, Finally>)
+        explicit Finally(T&& destructor) : destructor{destructor} {}
+
+        ~Finally() {
+            destructor();
+        }
+    };
 }
 
 #endif //PANKO_UTIL_H
