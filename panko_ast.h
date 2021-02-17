@@ -138,6 +138,10 @@ namespace panko::ast {
         size_t function{};
     };
 
+    struct TypeDeclaration : Statement {
+        size_t type{};
+    };
+
     struct VariableExpression : Expression {
         Identifier variable;
     };

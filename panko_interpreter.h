@@ -25,16 +25,28 @@ namespace panko::runtime {
         std::map<util::string_hash, Value> attributes;
     };
 
-    Value constructValue(const ast::Type& type) {
-        if (type.name == util::string_hash{"int"}) {
-            return Value{std::in_place_type<int>};
-        } else if (type.name == util::string_hash{"float"}) {
-            return Value{std::in_place_type<double>};
-        } else if (type.name == util::string_hash{"bool"}) {
-            return Value{std::in_place_type<bool>};
-        } else {
-            return std::monostate{};
-        }
+    std::ostream& operator<<(std::ostream& os, const Value& val) {
+        static int tab_depth = 0;
+
+        util::visit(val.getVariant(), [&os](const ComplexValue& val) {
+            os << "Type:";
+            tab_depth++;
+            for (const auto &kv : val.attributes) {
+                os << '\n' << std::string(tab_depth, '-') << kv.second;
+            }
+            tab_depth--;
+        }, [&os](int val){
+            os << "Int: " << val;
+        }, [&os](double val){
+            os << "Double: " << val;
+        }, [&os](bool val){
+            os << "Bool: " << val;
+        }, [&os](Null){
+            os << "Null";
+        }, [&os](Returning){
+            os << "Returning";
+        });
+        return os;
     }
 
     struct Interpreter : ast::BaseVisitor<Value> {
@@ -98,15 +110,27 @@ namespace panko::runtime {
             }
         }
 
+        Value constructValue(const ast::Type& type) {
+            if (type.name == util::string_hash{"int"}) {
+                return Value{std::in_place_type<int>};
+            } else if (type.name == util::string_hash{"float"}) {
+                return Value{std::in_place_type<double>};
+            } else if (type.name == util::string_hash{"bool"}) {
+                return Value{std::in_place_type<bool>};
+            } else {
+                ComplexValue val{};
+
+                for (const auto& attr : type.attributes) {
+                    val.attributes.emplace(attr.name, constructValue(*findType(attr.type)));
+                }
+
+                return val;
+            }
+        }
+
         Value visitFile(ast::File *file) override {
             for (auto& statement : file->statements) {
-                util::visit(visit(statement.get()).getVariant(),
-                    [](int i){std::cout << "Int: " << i << '\n';},
-                    [](double d){std::cout << "Double: " << d << '\n';},
-                    [](bool b){std::cout << "Bool: " << b << '\n';},
-                    [](Returning){std::cout << "Return value\n";},
-                    [](auto){std::cout << "Not a value\n";}
-                );
+                std::cout << visit(statement.get()) << '\n';
             }
 
             return std::monostate{};
@@ -219,10 +243,9 @@ namespace panko::runtime {
 
             if (auto assignment = var_decl->assignment.get()) {
                 values.at(var_decl->variable) = visit(assignment);
-                return values.at(var_decl->variable);
-            } else {
-                return std::monostate{};
             }
+
+            return values.at(var_decl->variable);
         }
 
         Value visitVariableExpression(ast::VariableExpression *identifier) override {
@@ -338,6 +361,10 @@ namespace panko::runtime {
             }
 
             return ret_val;
+        }
+
+        Value visitTypeDeclaration(ast::TypeDeclaration*) override {
+            return std::monostate{};
         }
     };
 }

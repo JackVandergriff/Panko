@@ -27,8 +27,8 @@ public:
     RuleFile = 0, RuleBlock = 1, RuleFunc_decl = 2, RuleStatement = 3, RuleExpression = 4, 
     RuleTyped_identifier = 5, RuleType = 6, RuleArgument_list = 7, RuleVar_decl = 8, 
     RuleIf_statement = 9, RuleIf_block = 10, RuleWhile_loop = 11, RuleReturn_statement = 12, 
-    RuleBuiltin_type = 13, RuleBinary_operator = 14, RuleUnary_operator = 15, 
-    RuleAssignment_operator = 16
+    RuleType_decl = 13, RuleBuiltin_type = 14, RuleBinary_operator = 15, 
+    RuleUnary_operator = 16, RuleAssignment_operator = 17
   };
 
   explicit PankoParser(antlr4::TokenStream *input);
@@ -54,6 +54,7 @@ public:
   class If_blockContext;
   class While_loopContext;
   class Return_statementContext;
+  class Type_declContext;
   class Builtin_typeContext;
   class Binary_operatorContext;
   class Unary_operatorContext;
@@ -153,6 +154,7 @@ public:
     Block_statementContext(StatementContext *ctx);
 
     Func_declContext *func_decl();
+    Type_declContext *type_decl();
     If_statementContext *if_statement();
     While_loopContext *while_loop();
     BlockContext *block();
@@ -447,6 +449,34 @@ public:
   };
 
   Return_statementContext* return_statement();
+
+  class  Type_declContext : public antlr4::ParserRuleContext {
+  public:
+    PankoParser::Var_declContext *var_declContext = nullptr;
+    std::vector<Var_declContext *> vars;
+    PankoParser::Func_declContext *func_declContext = nullptr;
+    std::vector<Func_declContext *> funcs;
+    Type_declContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *TYPE();
+    antlr4::tree::TerminalNode *IDENTIFIER();
+    antlr4::tree::TerminalNode *OBRACE();
+    antlr4::tree::TerminalNode *CBRACE();
+    std::vector<Func_declContext *> func_decl();
+    Func_declContext* func_decl(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> SEMICLN();
+    antlr4::tree::TerminalNode* SEMICLN(size_t i);
+    std::vector<Var_declContext *> var_decl();
+    Var_declContext* var_decl(size_t i);
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Type_declContext* type_decl();
 
   class  Builtin_typeContext : public antlr4::ParserRuleContext {
   public:

@@ -65,6 +65,8 @@ public:
 
     virtual antlrcpp::Any visitReturn_statement(PankoParser::Return_statementContext *context) = 0;
 
+    virtual antlrcpp::Any visitType_decl(PankoParser::Type_declContext *context) = 0;
+
     virtual antlrcpp::Any visitBuiltin_type(PankoParser::Builtin_typeContext *context) = 0;
 
     virtual antlrcpp::Any visitBinary_operator(PankoParser::Binary_operatorContext *context) = 0;

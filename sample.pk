@@ -1,5 +1,16 @@
 module sample;
 
+type point {
+    int x;
+    int y;
+}
+
+type line {
+    point p1;
+    point p2;
+    bool direction;
+}
+
 int bad_fib(int index) {
     if (index < 2) {
         return 1;
@@ -8,7 +19,9 @@ int bad_fib(int index) {
     }
 }
 
-bad_fib(0);
+int num;
+
+bad_fib(num);
 bad_fib(1);
 bad_fib(2);
 bad_fib(3);
@@ -17,3 +30,8 @@ bad_fib(5);
 bad_fib(6);
 bad_fib(7);
 bad_fib(8);
+
+point p;
+line l;
+
+bad_fib(20);

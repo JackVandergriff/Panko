@@ -83,6 +83,9 @@ public:
   virtual void enterReturn_statement(PankoParser::Return_statementContext *ctx) = 0;
   virtual void exitReturn_statement(PankoParser::Return_statementContext *ctx) = 0;
 
+  virtual void enterType_decl(PankoParser::Type_declContext *ctx) = 0;
+  virtual void exitType_decl(PankoParser::Type_declContext *ctx) = 0;
+
   virtual void enterBuiltin_type(PankoParser::Builtin_typeContext *ctx) = 0;
   virtual void exitBuiltin_type(PankoParser::Builtin_typeContext *ctx) = 0;
 

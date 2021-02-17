@@ -32,6 +32,7 @@ namespace panko::ast {
         virtual T visitWhileLoop(WhileLoop*)=0;
         virtual T visitReturnStatement(ReturnStatement*)=0;
         virtual T visitFunctionDeclaration(FunctionDeclaration*)=0;
+        virtual T visitTypeDeclaration(TypeDeclaration*)=0;
 
         T visit(Node* node) { // Will dispatch to most specified type
             if (auto statement = dynamic_cast<Statement*>(node)) {
@@ -61,6 +62,8 @@ namespace panko::ast {
                     return visitVariableDeclaration(var_decl);
                 } else if (auto func_decl = dynamic_cast<FunctionDeclaration*>(statement)) {
                     return visitFunctionDeclaration(func_decl);
+                } else if (auto type_decl = dynamic_cast<TypeDeclaration*>(statement)) {
+                    return visitTypeDeclaration(type_decl);
                 } else if (auto if_stat = dynamic_cast<IfStatement*>(statement)) {
                     return visitIfStatement(if_stat);
                 } else if (auto while_loop = dynamic_cast<WhileLoop*>(statement)) {
@@ -143,6 +146,10 @@ namespace panko::ast {
         }
 
         T visitFunctionDeclaration(FunctionDeclaration*) override {
+            return T();
+        }
+
+        T visitTypeDeclaration(TypeDeclaration*) override {
             return T();
         }
     };

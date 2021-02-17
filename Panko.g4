@@ -11,6 +11,7 @@ func_decl: ret_type=typed_identifier OPAREN (params+=typed_identifier (COMMA par
 statement : expression SEMICLN #semi_statement
  | func_decl #block_statement
  | var_decl SEMICLN #semi_statement
+ | type_decl #block_statement
  | if_statement #block_statement
  | while_loop #block_statement
  | block #block_statement
@@ -42,6 +43,8 @@ if_block : OPAREN expression CPAREN block;
 while_loop : WHILE OPAREN expression CPAREN block;
 
 return_statement : RETURN expression;
+
+type_decl : TYPE IDENTIFIER OBRACE ((vars+=var_decl SEMICLN) | funcs+=func_decl)+ CBRACE;
 
 // KEYWORDS
 

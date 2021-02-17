@@ -107,6 +107,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitType_decl(PankoParser::Type_declContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitBuiltin_type(PankoParser::Builtin_typeContext *ctx) override {
     return visitChildren(ctx);
   }

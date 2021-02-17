@@ -85,6 +85,9 @@ public:
   virtual void enterReturn_statement(PankoParser::Return_statementContext * /*ctx*/) override { }
   virtual void exitReturn_statement(PankoParser::Return_statementContext * /*ctx*/) override { }
 
+  virtual void enterType_decl(PankoParser::Type_declContext * /*ctx*/) override { }
+  virtual void exitType_decl(PankoParser::Type_declContext * /*ctx*/) override { }
+
   virtual void enterBuiltin_type(PankoParser::Builtin_typeContext * /*ctx*/) override { }
   virtual void exitBuiltin_type(PankoParser::Builtin_typeContext * /*ctx*/) override { }
 

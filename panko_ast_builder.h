@@ -182,7 +182,10 @@ namespace panko {
                     ast_context.mangle(context->typed_identifier()->IDENTIFIER()->getText()),
                     ast::Identifier{context->typed_identifier()->type()->getText(), ast_context}
             );
-            expr->assignment = make_unique_any<ast::Expression>(context->expression()->accept(this));
+
+            if (auto assn = context->expression()) {
+                expr->assignment = make_unique_any<ast::Expression>(assn->accept(this));
+            }
 
             return static_cast<ast::Node*>(expr);
         }
@@ -223,6 +226,22 @@ namespace panko {
 
         antlrcpp::Any visitParen_expr(PankoParser::Paren_exprContext *context) override {
             return context->expression()->accept(this);
+        }
+
+        antlrcpp::Any visitType_decl(PankoParser::Type_declContext *context) override {
+            auto type_node = new ast::TypeDeclaration();
+            ast::Type type{context->IDENTIFIER()->getText()};
+
+            for (auto var : context->vars) {
+                type.attributes.emplace_back(
+                        util::string_hash{var->typed_identifier()->IDENTIFIER()->getText()},
+                        ast::Identifier{var->typed_identifier()->type()->getText(), ast_context}
+                );
+            }
+
+            type_node->type = built_ast.types.make(std::move(type));
+
+            return static_cast<ast::Node*>(type_node);
         }
 
         template<typename T>
