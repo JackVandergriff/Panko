@@ -12,14 +12,23 @@
 
 namespace panko::runtime {
 
+    struct BadOperatorCall : util::Exception {
+        using util::Exception::Exception;
+    };
+
     struct ComplexValue;
     struct ReturnValue;
+    struct Reference;
 
     struct Returning {};
 
     using Null = std::monostate;
-    using Value = util::invariant<int, double, bool, Null, ComplexValue, Returning>;
-    using WeakValue = std::variant<int, double, bool, Null, ComplexValue, Returning>;
+    using Value = util::invariant<int, double, bool, Null, ComplexValue, Returning, Reference>;
+    using WeakValue = std::variant<int, double, bool, Null, ComplexValue, Returning, Reference>;
+
+    struct Reference {
+        size_t value; // Used to look into interpreter::values
+    };
 
     struct ComplexValue {
         std::map<util::string_hash, Value> attributes;
@@ -28,24 +37,22 @@ namespace panko::runtime {
     std::ostream& operator<<(std::ostream& os, const Value& val) {
         static int tab_depth = 0;
 
-        util::visit(val.getVariant(), [&os](const ComplexValue& val) {
-            os << "Type:";
-            tab_depth++;
-            for (const auto &kv : val.attributes) {
-                os << '\n' << std::string(tab_depth, '-') << kv.second;
-            }
-            tab_depth--;
-        }, [&os](int val){
-            os << "Int: " << val;
-        }, [&os](double val){
-            os << "Double: " << val;
-        }, [&os](bool val){
-            os << "Bool: " << val;
-        }, [&os](Null){
-            os << "Null";
-        }, [&os](Returning){
-            os << "Returning";
-        });
+        util::visit(val.getVariant(),
+            [&os](const ComplexValue& val) {
+                os << "Type:";
+                tab_depth++;
+                for (const auto &kv : val.attributes) {
+                    os << '\n' << std::string(tab_depth, '-') << kv.second;
+                }
+                tab_depth--;
+            },
+            [&os](int val){ os << "Int: " << val; },
+            [&os](double val){ os << "Double: " << val; },
+            [&os](bool val){ os << "Bool: " << val; },
+            [&os](Reference val){ os << "Reference to " << val.value; },
+            [&os](Null){ os << "Null"; },
+            [&os](Returning){ os << "Returning"; }
+        );
         return os;
     }
 
@@ -62,6 +69,15 @@ namespace panko::runtime {
             std::cout << std::boolalpha;
             for (auto& file : ast.files) {
                 visitFile(file.get());
+            }
+        }
+
+        Value removeReference(const Value& value) {
+            if (std::holds_alternative<Reference>(value.getVariant())) {
+                std::cout << "Stripping reference\n";
+                return values.at(std::get<Reference>(value.getVariant()).value);
+            } else {
+                return value;
             }
         }
 
@@ -126,6 +142,10 @@ namespace panko::runtime {
 
                 return val;
             }
+        }
+
+        Value makeReference(const ast::Identifier& id) {
+            return Reference{std::get<size_t>(findVariableAndHash(id))};
         }
 
         Value visitFile(ast::File *file) override {
@@ -199,12 +219,13 @@ namespace panko::runtime {
                     }
                 },
                 int_float_lambda,
-                [](auto, auto){return Value{std::monostate{}};}
-            }, visit(expression->lhs.get()).getVariant(), visit(expression->rhs.get()).getVariant());
+                [](auto x, auto y){throw BadOperatorCall{"Failed to find operator overload"}; return Value{std::monostate{}};}
+            }, removeReference(visit(expression->lhs.get())).getVariant()
+            , removeReference(visit(expression->rhs.get())).getVariant());
         }
 
         Value visitUnaryOperatorExpression(ast::UnaryOperatorExpression* expression) override {
-            int lhs = std::get<int>(visit(expression->lhs.get()).getVariant());
+            int lhs = std::get<int>(removeReference(visit(expression->lhs.get())).getVariant());
 
             switch (expression->op) {
                 case ast::UnaryOperator::BITNOT:
