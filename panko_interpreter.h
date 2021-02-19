@@ -16,6 +16,10 @@ namespace panko::runtime {
         using util::Exception::Exception;
     };
 
+    struct BadTypeConversion : util::Exception {
+        using util::Exception::Exception;
+    };
+
     struct ComplexValue;
     struct ReturnValue;
     struct Reference;
@@ -26,12 +30,12 @@ namespace panko::runtime {
     using Value = util::invariant<int, double, bool, Null, ComplexValue, Returning, Reference>;
     using WeakValue = std::variant<int, double, bool, Null, ComplexValue, Returning, Reference>;
 
-    struct Reference {
-        size_t value; // Used to look into interpreter::values
-    };
-
     struct ComplexValue {
         std::map<util::string_hash, Value> attributes;
+    };
+
+    struct Reference {
+        Value* value;
     };
 
     std::ostream& operator<<(std::ostream& os, const Value& val) {
@@ -49,7 +53,7 @@ namespace panko::runtime {
             [&os](int val){ os << "Int: " << val; },
             [&os](double val){ os << "Double: " << val; },
             [&os](bool val){ os << "Bool: " << val; },
-            [&os](Reference val){ os << "Reference to " << val.value; },
+            [&os](Reference val){ os << "Reference to " << *val.value; },
             [&os](Null){ os << "Null"; },
             [&os](Returning){ os << "Returning"; }
         );
@@ -72,12 +76,19 @@ namespace panko::runtime {
             }
         }
 
-        Value removeReference(const Value& value) {
+        static const Value& removeReference(const Value& value) {
             if (std::holds_alternative<Reference>(value.getVariant())) {
-                std::cout << "Stripping reference\n";
-                return values.at(std::get<Reference>(value.getVariant()).value);
+                return *std::get<Reference>(value.getVariant()).value;
             } else {
                 return value;
+            }
+        }
+
+        static Value& getReferenceValue(const Value& ref) {
+            try {
+                return *util::get<Reference>(ref).value;
+            } catch (std::bad_variant_access&) {
+                throw BadTypeConversion{"Value is not a reference"};
             }
         }
 
@@ -144,8 +155,8 @@ namespace panko::runtime {
             }
         }
 
-        Value makeReference(const ast::Identifier& id) {
-            return Reference{std::get<size_t>(findVariableAndHash(id))};
+        Reference makeReference(const ast::Identifier& id) {
+            return Reference{&findValue(id)};
         }
 
         Value visitFile(ast::File *file) override {
@@ -270,11 +281,11 @@ namespace panko::runtime {
         }
 
         Value visitVariableExpression(ast::VariableExpression *identifier) override {
-            return findValue(identifier->variable);
+            return makeReference(identifier->variable);
         }
 
         Value visitComplexAssignment(ast::ComplexAssignment *assignment) override {
-            auto& var = findValue(assignment->variable);
+            auto& var = getReferenceValue(visit(assignment->reference.get()));
             var = util::visit(var.getVariant(),
                 [assignment](util::Number auto value){
                     if (assignment->increment) {
@@ -290,8 +301,8 @@ namespace panko::runtime {
         }
 
         Value visitSimpleAssignment(ast::SimpleAssignment *assignment) override {
-            auto& var = findValue(assignment->variable);
-            var = visit(assignment->expression.get());
+            auto& var = getReferenceValue(visit(assignment->reference.get()));
+            var = removeReference(visit(assignment->expression.get()));
             return var;
         }
 
@@ -366,7 +377,7 @@ namespace panko::runtime {
                         util::string_hash{static_cast<std::string>(cur.name) + std::to_string(call_stack_size + 1)},
                         std::ref(cur.type)
                     )),
-                    visit(call->arguments.at(i).get())
+                    removeReference(visit(call->arguments.at(i).get()))
                 );
             }
 
@@ -386,6 +397,19 @@ namespace panko::runtime {
 
         Value visitTypeDeclaration(ast::TypeDeclaration*) override {
             return std::monostate{};
+        }
+
+        Value visitAccessExpression(ast::AccessExpression* access) override {
+            auto [hash, var_ptr] = findVariableAndHash(access->initial);
+            Reference ret_val = makeReference(access->initial);
+
+            if (var_ptr) {
+                for (const auto& accessor : access->accessors) {
+                    ret_val.value = &util::get<ComplexValue>(*ret_val.value).attributes.at(accessor);
+                }
+            }
+
+            return ret_val;
         }
     };
 }

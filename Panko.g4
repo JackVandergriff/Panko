@@ -21,8 +21,9 @@ expression : OPAREN expression CPAREN #paren_expr
  | lhs=expression binary_operator rhs=expression #binary_expr
  | unary_operator expression #unary_expr
  | IDENTIFIER OPAREN argument_list? CPAREN #func_expr
- | IDENTIFIER assignment_operator expression #simple_assignment
- | IDENTIFIER op=(INC | DEC) #complex_assignment
+ | lhs=expression assignment_operator rhs=expression #simple_assignment
+ | expression op=(INC | DEC) #complex_assignment
+ | initial=IDENTIFIER (PERIOD accessors+=IDENTIFIER)+ #access_expr
  | IDENTIFIER #id_expr
  | INTLIT #int_lit
  | FLOATLIT #float_lit

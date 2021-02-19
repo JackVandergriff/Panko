@@ -37,17 +37,20 @@ public:
   virtual void enterUnary_expr(PankoParser::Unary_exprContext * /*ctx*/) override { }
   virtual void exitUnary_expr(PankoParser::Unary_exprContext * /*ctx*/) override { }
 
+  virtual void enterAccess_expr(PankoParser::Access_exprContext * /*ctx*/) override { }
+  virtual void exitAccess_expr(PankoParser::Access_exprContext * /*ctx*/) override { }
+
   virtual void enterComplex_assignment(PankoParser::Complex_assignmentContext * /*ctx*/) override { }
   virtual void exitComplex_assignment(PankoParser::Complex_assignmentContext * /*ctx*/) override { }
 
   virtual void enterBinary_expr(PankoParser::Binary_exprContext * /*ctx*/) override { }
   virtual void exitBinary_expr(PankoParser::Binary_exprContext * /*ctx*/) override { }
 
-  virtual void enterSimple_assignment(PankoParser::Simple_assignmentContext * /*ctx*/) override { }
-  virtual void exitSimple_assignment(PankoParser::Simple_assignmentContext * /*ctx*/) override { }
-
   virtual void enterId_expr(PankoParser::Id_exprContext * /*ctx*/) override { }
   virtual void exitId_expr(PankoParser::Id_exprContext * /*ctx*/) override { }
+
+  virtual void enterSimple_assignment(PankoParser::Simple_assignmentContext * /*ctx*/) override { }
+  virtual void exitSimple_assignment(PankoParser::Simple_assignmentContext * /*ctx*/) override { }
 
   virtual void enterFunc_expr(PankoParser::Func_exprContext * /*ctx*/) override { }
   virtual void exitFunc_expr(PankoParser::Func_exprContext * /*ctx*/) override { }

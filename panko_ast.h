@@ -147,12 +147,12 @@ namespace panko::ast {
     };
 
     struct SimpleAssignment : Expression {
-        Identifier variable;
+        std::unique_ptr<Expression> reference;
         std::unique_ptr<Expression> expression;
     };
 
     struct ComplexAssignment : Expression {
-        Identifier variable;
+        std::unique_ptr<Expression> reference;
         bool increment{false};
     };
 
@@ -178,6 +178,11 @@ namespace panko::ast {
     struct File : Node {
         std::string module;
         std::vector<std::unique_ptr<Statement>> statements;
+    };
+
+    struct AccessExpression : Expression {
+        Identifier initial;
+        std::vector<std::string> accessors;
     };
 
     struct AST {

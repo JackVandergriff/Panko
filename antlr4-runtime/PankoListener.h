@@ -35,17 +35,20 @@ public:
   virtual void enterUnary_expr(PankoParser::Unary_exprContext *ctx) = 0;
   virtual void exitUnary_expr(PankoParser::Unary_exprContext *ctx) = 0;
 
+  virtual void enterAccess_expr(PankoParser::Access_exprContext *ctx) = 0;
+  virtual void exitAccess_expr(PankoParser::Access_exprContext *ctx) = 0;
+
   virtual void enterComplex_assignment(PankoParser::Complex_assignmentContext *ctx) = 0;
   virtual void exitComplex_assignment(PankoParser::Complex_assignmentContext *ctx) = 0;
 
   virtual void enterBinary_expr(PankoParser::Binary_exprContext *ctx) = 0;
   virtual void exitBinary_expr(PankoParser::Binary_exprContext *ctx) = 0;
 
-  virtual void enterSimple_assignment(PankoParser::Simple_assignmentContext *ctx) = 0;
-  virtual void exitSimple_assignment(PankoParser::Simple_assignmentContext *ctx) = 0;
-
   virtual void enterId_expr(PankoParser::Id_exprContext *ctx) = 0;
   virtual void exitId_expr(PankoParser::Id_exprContext *ctx) = 0;
+
+  virtual void enterSimple_assignment(PankoParser::Simple_assignmentContext *ctx) = 0;
+  virtual void exitSimple_assignment(PankoParser::Simple_assignmentContext *ctx) = 0;
 
   virtual void enterFunc_expr(PankoParser::Func_exprContext *ctx) = 0;
   virtual void exitFunc_expr(PankoParser::Func_exprContext *ctx) = 0;

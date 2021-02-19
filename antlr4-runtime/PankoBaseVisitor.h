@@ -43,6 +43,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitAccess_expr(PankoParser::Access_exprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitComplex_assignment(PankoParser::Complex_assignmentContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -51,11 +55,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitSimple_assignment(PankoParser::Simple_assignmentContext *ctx) override {
+  virtual antlrcpp::Any visitId_expr(PankoParser::Id_exprContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitId_expr(PankoParser::Id_exprContext *ctx) override {
+  virtual antlrcpp::Any visitSimple_assignment(PankoParser::Simple_assignmentContext *ctx) override {
     return visitChildren(ctx);
   }
 

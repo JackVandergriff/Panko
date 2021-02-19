@@ -204,12 +204,29 @@ public:
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
+  class  Access_exprContext : public ExpressionContext {
+  public:
+    Access_exprContext(ExpressionContext *ctx);
+
+    antlr4::Token *initial = nullptr;
+    antlr4::Token *identifierToken = nullptr;
+    std::vector<antlr4::Token *> accessors;
+    std::vector<antlr4::tree::TerminalNode *> IDENTIFIER();
+    antlr4::tree::TerminalNode* IDENTIFIER(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> PERIOD();
+    antlr4::tree::TerminalNode* PERIOD(size_t i);
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   class  Complex_assignmentContext : public ExpressionContext {
   public:
     Complex_assignmentContext(ExpressionContext *ctx);
 
     antlr4::Token *op = nullptr;
-    antlr4::tree::TerminalNode *IDENTIFIER();
+    ExpressionContext *expression();
     antlr4::tree::TerminalNode *INC();
     antlr4::tree::TerminalNode *DEC();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -233,24 +250,26 @@ public:
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
-  class  Simple_assignmentContext : public ExpressionContext {
+  class  Id_exprContext : public ExpressionContext {
   public:
-    Simple_assignmentContext(ExpressionContext *ctx);
+    Id_exprContext(ExpressionContext *ctx);
 
     antlr4::tree::TerminalNode *IDENTIFIER();
-    Assignment_operatorContext *assignment_operator();
-    ExpressionContext *expression();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
-  class  Id_exprContext : public ExpressionContext {
+  class  Simple_assignmentContext : public ExpressionContext {
   public:
-    Id_exprContext(ExpressionContext *ctx);
+    Simple_assignmentContext(ExpressionContext *ctx);
 
-    antlr4::tree::TerminalNode *IDENTIFIER();
+    PankoParser::ExpressionContext *lhs = nullptr;
+    PankoParser::ExpressionContext *rhs = nullptr;
+    Assignment_operatorContext *assignment_operator();
+    std::vector<ExpressionContext *> expression();
+    ExpressionContext* expression(size_t i);
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 

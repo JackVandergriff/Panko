@@ -33,13 +33,15 @@ public:
 
     virtual antlrcpp::Any visitUnary_expr(PankoParser::Unary_exprContext *context) = 0;
 
+    virtual antlrcpp::Any visitAccess_expr(PankoParser::Access_exprContext *context) = 0;
+
     virtual antlrcpp::Any visitComplex_assignment(PankoParser::Complex_assignmentContext *context) = 0;
 
     virtual antlrcpp::Any visitBinary_expr(PankoParser::Binary_exprContext *context) = 0;
 
-    virtual antlrcpp::Any visitSimple_assignment(PankoParser::Simple_assignmentContext *context) = 0;
-
     virtual antlrcpp::Any visitId_expr(PankoParser::Id_exprContext *context) = 0;
+
+    virtual antlrcpp::Any visitSimple_assignment(PankoParser::Simple_assignmentContext *context) = 0;
 
     virtual antlrcpp::Any visitFunc_expr(PankoParser::Func_exprContext *context) = 0;
 

@@ -183,7 +183,15 @@ namespace panko::util {
         [[nodiscard]] size_t getIndex() const {
             return variant.index();
         }
+
+        template<typename>
+        friend decltype(auto) get(auto&&);
     };
+
+    template<typename T>
+    decltype(auto) get(auto&& invariant) {
+        return std::get<T>(invariant.variant);
+    }
 
     class Finally {
     private:

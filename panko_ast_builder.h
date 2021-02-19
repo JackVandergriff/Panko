@@ -89,7 +89,7 @@ namespace panko {
 
         antlrcpp::Any visitComplex_assignment(PankoParser::Complex_assignmentContext *context) override {
             auto expr = new ast::ComplexAssignment();
-            expr->variable = {context->IDENTIFIER()->getText(), std::ref(ast_context)};
+            expr->reference = make_unique_any<ast::Expression>(context->expression()->accept(this));
             expr->increment = context->op->getText() == "++";
             return static_cast<ast::Node*>(expr);
         }
@@ -140,8 +140,8 @@ namespace panko {
 
         antlrcpp::Any visitSimple_assignment(PankoParser::Simple_assignmentContext *context) override {
             auto expr = new ast::SimpleAssignment();
-            expr->variable = {context->IDENTIFIER()->getText(), std::ref(ast_context)};
-            expr->expression = make_unique_any<ast::Expression>(context->expression()->accept(this));
+            expr->reference = make_unique_any<ast::Expression>(context->lhs->accept(this));
+            expr->expression = make_unique_any<ast::Expression>(context->rhs->accept(this));
             return static_cast<ast::Node*>(expr);
         }
 
@@ -242,6 +242,17 @@ namespace panko {
             type_node->type = built_ast.types.make(std::move(type));
 
             return static_cast<ast::Node*>(type_node);
+        }
+
+        antlrcpp::Any visitAccess_expr(PankoParser::Access_exprContext *context) override {
+            auto access = new ast::AccessExpression();
+
+            access->initial = {context->initial->getText(), std::ref(ast_context)};
+            for (const auto& accessor : context->accessors) {
+                access->accessors.emplace_back(accessor->getText());
+            }
+
+            return static_cast<ast::Node*>(access);
         }
 
         template<typename T>
