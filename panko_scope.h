@@ -20,38 +20,13 @@ namespace panko::scope {
         std::vector<std::string> context;
         static inline int id = 0;
     public:
-        void pop() {
-            context.pop_back();
-        }
+        void pop();
+        void push(const std::string& name);
+        void push_unique(const std::string& name);
+        util::Finally push_local(const std::string& name);
+        util::Finally push_unique_local(const std::string& name);
 
-        void push(const std::string& name) {
-            context.push_back(name);
-        }
-
-        void push_unique(const std::string& name) {
-            context.push_back(name + std::to_string(id++));
-        }
-
-        util::Finally push_local(const std::string& name) {
-            push(name);
-            return util::Finally{[this](){pop();}};
-        }
-
-        util::Finally push_unique_local(const std::string& name) {
-            push_unique(name);
-            return util::Finally{[this](){pop();}};
-        }
-
-
-        [[nodiscard]] std::string mangle(const std::string& name) const {
-            std::string ret_val;
-
-            for (auto& scope : context) {
-                ret_val += scope + '.';
-            }
-
-            return ret_val + name;
-        }
+        [[nodiscard]] std::string mangle(const std::string& name) const;
 
         template<typename T>
         std::tuple<size_t, const T*> lookup(const std::string& name, const util::hasher<T>& hasher) const {

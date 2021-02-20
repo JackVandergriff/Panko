@@ -10,6 +10,9 @@
 #include <concepts>
 #include <exception>
 #include <utility>
+#include <variant>
+#include <set>
+#include <map>
 
 namespace panko::ast {
     template<typename T> struct hash;
@@ -61,28 +64,17 @@ namespace panko::util {
     struct string_hash {
     private:
         static inline std::map<size_t, std::string> hash_map{};
-    public:
         size_t hash;
+    public:
 
-        string_hash(const std::string& str): hash{std::hash<std::string>{}(str)} {
-            hash_map.emplace(hash, str);
-        }
+        string_hash(const std::string& str);
+        string_hash(const char* str);
+        explicit operator std::string() const;
 
-        string_hash(const char* str): hash{std::hash<std::string_view>{}(str)} {
-            hash_map.emplace(hash, str);
-        }
+        [[nodiscard]] size_t getHash() const;
 
-        explicit operator std::string() const {
-            return hash_map.at(hash);
-        }
-
-        friend bool operator==(const string_hash& lhs, const string_hash& rhs) {
-            return lhs.hash == rhs.hash;
-        }
-
-        friend bool operator<(const string_hash& lhs, const string_hash& rhs) {
-            return lhs.hash < rhs.hash;
-        }
+        friend bool operator==(const string_hash& lhs, const string_hash& rhs);
+        friend bool operator<(const string_hash& lhs, const string_hash& rhs);
     };
 
     template<class... Ts> struct visitor : Ts... { using Ts::operator()...; };
@@ -204,6 +196,29 @@ namespace panko::util {
             destructor();
         }
     };
+
+    template<typename T1, typename T2>
+    bool typeEqual(const std::map<T1, T2>& lhs, const std::map<T1, T2>& rhs) {
+        return lhs.size() == rhs.size()
+            && std::equal(lhs.begin(), lhs.end(), rhs.begin(),
+            [](const auto& lhs, const auto& rhs){return lhs.first == rhs.first;});
+    }
+
+    template<typename T1, typename T2>
+    bool typeSubset(const std::map<T1, T2>& lhs, const std::map<T1, T2>& rhs) {
+        if (lhs.size() > rhs.size()) return false;
+        for (const auto& kv : lhs) {
+            if (rhs.find(kv.first) == rhs.end()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    template<typename T1, typename T2>
+    bool typeSuperset(const std::map<T1, T2>& lhs, const std::map<T1, T2>& rhs) {
+        return typeSubset(rhs, lhs);
+    }
 }
 
 #endif //PANKO_UTIL_H

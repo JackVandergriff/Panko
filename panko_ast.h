@@ -5,14 +5,14 @@
 #ifndef PANKO_AST_H
 #define PANKO_AST_H
 
+#include "PankoBaseVisitor.h"
+#include "panko_util.h"
+#include "panko_scope.h"
+
 #include <string>
 #include <utility>
 #include <vector>
 #include <functional>
-
-#include "PankoBaseVisitor.h"
-#include "panko_util.h"
-#include "panko_scope.h"
 
 namespace panko::ast {
 
@@ -77,19 +77,19 @@ namespace panko::ast {
 namespace std {
     template<> struct hash<panko::ast::Type> {
         size_t operator()(const panko::ast::Type& type) const {
-            return type.name.hash;
+            return type.name.getHash();
         }
     };
 
     template<> struct hash<panko::ast::Variable> {
         size_t operator()(const panko::ast::Variable& type) const {
-            return type.name.hash;
+            return type.name.getHash();
         }
     };
 
     template<> struct hash<panko::ast::Function> {
         size_t operator()(const panko::ast::Function& type) const {
-            return type.name.hash;
+            return type.name.getHash();
         }
     };
 }
@@ -192,7 +192,5 @@ namespace panko::ast {
         std::vector<std::unique_ptr<File>> files;
     };
 }
-
-
 
 #endif //PANKO_AST_H
