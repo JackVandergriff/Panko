@@ -18,17 +18,17 @@ public:
     ADD = 22, SUB = 23, MUL = 24, DIV = 25, MOD = 26, XOR = 27, BITOR = 28, 
     BITAND = 29, BITNOT = 30, NOT = 31, ASSIGN = 32, ADDEQ = 33, SUBEQ = 34, 
     MULEQ = 35, DIVEQ = 36, MODEQ = 37, XOREQ = 38, BITOREQ = 39, BITANDEQ = 40, 
-    INC = 41, DEC = 42, SEMICLN = 43, COMMA = 44, PERIOD = 45, OPAREN = 46, 
-    CPAREN = 47, OBRACE = 48, CBRACE = 49, OBRACKET = 50, CBRACKET = 51, 
-    IDENTIFIER = 52, INTLIT = 53, FLOATLIT = 54, COMMENT = 55, SPACE = 56
+    INC = 41, DEC = 42, SEMICLN = 43, COLON = 44, COMMA = 45, PERIOD = 46, 
+    OPAREN = 47, CPAREN = 48, OBRACE = 49, CBRACE = 50, OBRACKET = 51, CBRACKET = 52, 
+    IDENTIFIER = 53, INTLIT = 54, FLOATLIT = 55, COMMENT = 56, SPACE = 57
   };
 
   enum {
     RuleFile = 0, RuleBlock = 1, RuleFunc_decl = 2, RuleStatement = 3, RuleExpression = 4, 
     RuleTyped_identifier = 5, RuleType = 6, RuleArgument_list = 7, RuleVar_decl = 8, 
     RuleIf_statement = 9, RuleIf_block = 10, RuleWhile_loop = 11, RuleReturn_statement = 12, 
-    RuleType_decl = 13, RuleBuiltin_type = 14, RuleBinary_operator = 15, 
-    RuleUnary_operator = 16, RuleAssignment_operator = 17
+    RuleType_decl = 13, RuleObject_var = 14, RuleBuiltin_type = 15, RuleBinary_operator = 16, 
+    RuleUnary_operator = 17, RuleAssignment_operator = 18
   };
 
   explicit PankoParser(antlr4::TokenStream *input);
@@ -55,6 +55,7 @@ public:
   class While_loopContext;
   class Return_statementContext;
   class Type_declContext;
+  class Object_varContext;
   class Builtin_typeContext;
   class Binary_operatorContext;
   class Unary_operatorContext;
@@ -312,6 +313,22 @@ public:
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
+  class  Obj_exprContext : public ExpressionContext {
+  public:
+    Obj_exprContext(ExpressionContext *ctx);
+
+    antlr4::tree::TerminalNode *OBRACE();
+    std::vector<Object_varContext *> object_var();
+    Object_varContext* object_var(size_t i);
+    antlr4::tree::TerminalNode *CBRACE();
+    std::vector<antlr4::tree::TerminalNode *> COMMA();
+    antlr4::tree::TerminalNode* COMMA(size_t i);
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   class  Bool_litContext : public ExpressionContext {
   public:
     Bool_litContext(ExpressionContext *ctx);
@@ -496,6 +513,23 @@ public:
   };
 
   Type_declContext* type_decl();
+
+  class  Object_varContext : public antlr4::ParserRuleContext {
+  public:
+    Object_varContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *IDENTIFIER();
+    antlr4::tree::TerminalNode *COLON();
+    ExpressionContext *expression();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Object_varContext* object_var();
 
   class  Builtin_typeContext : public antlr4::ParserRuleContext {
   public:

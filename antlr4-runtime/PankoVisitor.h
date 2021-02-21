@@ -49,6 +49,8 @@ public:
 
     virtual antlrcpp::Any visitFloat_lit(PankoParser::Float_litContext *context) = 0;
 
+    virtual antlrcpp::Any visitObj_expr(PankoParser::Obj_exprContext *context) = 0;
+
     virtual antlrcpp::Any visitBool_lit(PankoParser::Bool_litContext *context) = 0;
 
     virtual antlrcpp::Any visitTyped_identifier(PankoParser::Typed_identifierContext *context) = 0;
@@ -68,6 +70,8 @@ public:
     virtual antlrcpp::Any visitReturn_statement(PankoParser::Return_statementContext *context) = 0;
 
     virtual antlrcpp::Any visitType_decl(PankoParser::Type_declContext *context) = 0;
+
+    virtual antlrcpp::Any visitObject_var(PankoParser::Object_varContext *context) = 0;
 
     virtual antlrcpp::Any visitBuiltin_type(PankoParser::Builtin_typeContext *context) = 0;
 

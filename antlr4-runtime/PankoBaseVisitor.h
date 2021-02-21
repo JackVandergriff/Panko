@@ -75,6 +75,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitObj_expr(PankoParser::Obj_exprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitBool_lit(PankoParser::Bool_litContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -112,6 +116,10 @@ public:
   }
 
   virtual antlrcpp::Any visitType_decl(PankoParser::Type_declContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitObject_var(PankoParser::Object_varContext *ctx) override {
     return visitChildren(ctx);
   }
 

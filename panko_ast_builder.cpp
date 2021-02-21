@@ -242,6 +242,19 @@ antlrcpp::Any ASTBuilder::visitAccess_expr(PankoParser::Access_exprContext *cont
     return static_cast<ast::Node*>(access);
 }
 
+antlrcpp::Any ASTBuilder::visitObj_expr(PankoParser::Obj_exprContext *context) {
+    auto expr = new ast::ObjectExpression();
+
+    for (auto var : context->object_var()) {
+        expr->members.emplace_back(
+            util::string_hash{var->IDENTIFIER()->getText()},
+            make_unique_any<ast::Expression>(visit(var->expression()))
+        );
+    }
+
+    return static_cast<ast::Node*>(expr);
+}
+
 ASTBuilder::ASTBuilder() {
     built_ast.types.make("int");
     built_ast.types.make("float");

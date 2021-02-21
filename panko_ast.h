@@ -185,6 +185,10 @@ namespace panko::ast {
         std::vector<std::string> accessors;
     };
 
+    struct ObjectExpression : Expression {
+        std::vector<std::pair<util::string_hash, std::unique_ptr<Expression>>> members;
+    };
+
     struct AST {
         util::hasher<Type> types;
         util::hasher<Variable> variables;

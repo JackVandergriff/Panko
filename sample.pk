@@ -24,33 +24,18 @@ int bad_fib(int index) {
     }
 }
 
-int num;
-2 < 3;
-num < 2;
+point get_vector(line vector) {
+    if (vector.direction) {
+        return {x: vector.p2.x - vector.p1.x, y: vector.p2.y - vector.p1.y};
+    } else {
+        return {x: vector.p1.x - vector.p2.x, y: vector.p1.y - vector.p2.y};
+    }
+}
 
-num = 12;
+line l1 = {
+    p1 : {x: 0, y: 0},
+    p2 : {x: 10, y: ~10},
+    direction : false
+};
 
-bad_fib(num);
-bad_fib(1);
-bad_fib(2);
-bad_fib(3);
-bad_fib(4);
-bad_fib(5);
-bad_fib(6);
-bad_fib(7);
-bad_fib(8);
-
-point p;
-line l;
-line l2;
-
-false;
-point p2;
-
-p2.x = 1;
-p2.y = 1;
-
-p = p2;
-l.p1 = p;
-l2.direction = true;
-l2 = l;
+get_vector(l1);

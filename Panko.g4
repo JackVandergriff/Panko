@@ -24,6 +24,7 @@ expression : OPAREN expression CPAREN #paren_expr
  | lhs=expression assignment_operator rhs=expression #simple_assignment
  | expression op=(INC | DEC) #complex_assignment
  | initial=IDENTIFIER (PERIOD accessors+=IDENTIFIER)+ #access_expr
+ | OBRACE (object_var COMMA)* object_var CBRACE #obj_expr
  | IDENTIFIER #id_expr
  | INTLIT #int_lit
  | FLOATLIT #float_lit
@@ -46,6 +47,8 @@ while_loop : WHILE OPAREN expression CPAREN block;
 return_statement : RETURN expression;
 
 type_decl : TYPE IDENTIFIER OBRACE ((vars+=var_decl SEMICLN) | funcs+=func_decl)+ CBRACE;
+
+object_var : IDENTIFIER COLON expression;
 
 // KEYWORDS
 
@@ -109,6 +112,7 @@ assignment_operator : ASSIGN | ADDEQ | SUBEQ | MULEQ | DIVEQ | MODEQ | XOREQ | B
 // OTHER DELIMITERS
 
 SEMICLN : ';';
+COLON : ':';
 COMMA : ',';
 PERIOD : '.';
 OPAREN : '(';

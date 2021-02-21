@@ -40,6 +40,7 @@ namespace panko {
         antlrcpp::Any visitParen_expr(PankoParser::Paren_exprContext *context) override;
         antlrcpp::Any visitType_decl(PankoParser::Type_declContext *context) override;
         antlrcpp::Any visitAccess_expr(PankoParser::Access_exprContext *context) override;
+        antlrcpp::Any visitObj_expr(PankoParser::Obj_exprContext *context) override;
 
         template<typename T>
         std::unique_ptr<T> make_unique_any(antlrcpp::Any any) {

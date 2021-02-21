@@ -59,6 +59,9 @@ public:
   virtual void enterFloat_lit(PankoParser::Float_litContext *ctx) = 0;
   virtual void exitFloat_lit(PankoParser::Float_litContext *ctx) = 0;
 
+  virtual void enterObj_expr(PankoParser::Obj_exprContext *ctx) = 0;
+  virtual void exitObj_expr(PankoParser::Obj_exprContext *ctx) = 0;
+
   virtual void enterBool_lit(PankoParser::Bool_litContext *ctx) = 0;
   virtual void exitBool_lit(PankoParser::Bool_litContext *ctx) = 0;
 
@@ -88,6 +91,9 @@ public:
 
   virtual void enterType_decl(PankoParser::Type_declContext *ctx) = 0;
   virtual void exitType_decl(PankoParser::Type_declContext *ctx) = 0;
+
+  virtual void enterObject_var(PankoParser::Object_varContext *ctx) = 0;
+  virtual void exitObject_var(PankoParser::Object_varContext *ctx) = 0;
 
   virtual void enterBuiltin_type(PankoParser::Builtin_typeContext *ctx) = 0;
   virtual void exitBuiltin_type(PankoParser::Builtin_typeContext *ctx) = 0;

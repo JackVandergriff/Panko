@@ -34,6 +34,7 @@ namespace panko::ast {
         virtual T visitFunctionDeclaration(FunctionDeclaration*)=0;
         virtual T visitTypeDeclaration(TypeDeclaration*)=0;
         virtual T visitAccessExpression(AccessExpression*)=0;
+        virtual T visitObjectExpression(ObjectExpression*)=0;
 
         T visit(Node* node) { // Will dispatch to most specified type
             if (auto statement = dynamic_cast<Statement*>(node)) {
@@ -58,6 +59,8 @@ namespace panko::ast {
                         return visitSimpleAssignment(assignment);
                     } else if (auto access = dynamic_cast<AccessExpression*>(expression)) {
                         return visitAccessExpression(access);
+                    } else if (auto obj = dynamic_cast<ObjectExpression*>(expression)) {
+                        return visitObjectExpression(obj);
                     } else {
                         return visitExpression(expression);
                     }
@@ -157,6 +160,10 @@ namespace panko::ast {
         }
 
         T visitAccessExpression(AccessExpression*) override {
+            return T();
+        }
+
+        T visitObjectExpression(ObjectExpression*) override {
             return T();
         }
     };

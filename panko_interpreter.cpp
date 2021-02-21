@@ -210,14 +210,29 @@ Value Interpreter::visitBinaryOperatorExpression(ast::BinaryOperatorExpression *
 }
 
 Value Interpreter::visitUnaryOperatorExpression(ast::UnaryOperatorExpression* expression) {
-    int lhs = std::get<int>(removeReference(visit(expression->lhs.get())).getVariant());
-
-    switch (expression->op) {
-        case ast::UnaryOperator::BITNOT:
-            return Value{~lhs};
-        case ast::UnaryOperator::NOT:
-            return Value{!lhs};
-    }
+    return util::visit(removeReference(visit(expression->lhs.get())).getVariant(),
+        [expression](int lhs){
+            switch (expression->op) {
+                case ast::UnaryOperator::BITNOT:
+                    return Value{~lhs};
+                case ast::UnaryOperator::NOT:
+                    return Value{!lhs};
+            }
+        },
+        [expression](bool lhs){
+            switch (expression->op) {
+                case ast::UnaryOperator::NOT:
+                    return Value{!lhs};
+                default:
+                    throw BadOperatorCall{"Failed to find operator overload"};
+                    return Value{};
+            }
+        },
+        [](auto&&) {
+            throw BadOperatorCall{"Failed to find operator overload"};
+            return Value{};
+        }
+    );
 }
 
 Value Interpreter::visitIntegerLiteral(ast::IntegerLiteral *literal) {
@@ -293,7 +308,7 @@ Value Interpreter::visitBlock(ast::Block *block) {
 
 Value Interpreter::visitIfStatement(ast::IfStatement* if_stat) {
     for (auto& block : if_stat->if_blocks) {
-        if (std::get<bool>(visit(block.condition.get()).getVariant())) {
+        if (util::get<bool>(removeReference(visit(block.condition.get())))) {
             if (std::holds_alternative<Returning>(visit(block.block.get()).getVariant())) {
                 return Returning{};
             } else {
@@ -310,7 +325,7 @@ Value Interpreter::visitIfStatement(ast::IfStatement* if_stat) {
 }
 
 Value Interpreter::visitWhileLoop(ast::WhileLoop* loop) {
-    while (std::get<bool>(visit(loop->condition.get()).getVariant())) {
+    while (util::get<bool>(removeReference(visit(loop->condition.get())))) {
         if (std::holds_alternative<Returning>(visit(loop->body.get()).getVariant())) {
             return Returning{};
         }
@@ -380,6 +395,16 @@ Value Interpreter::visitAccessExpression(ast::AccessExpression* access) {
         for (const auto& accessor : access->accessors) {
             ret_val.value = &util::get<ComplexValue>(*ret_val.value).attributes.at(accessor);
         }
+    }
+
+    return ret_val;
+}
+
+Value Interpreter::visitObjectExpression(ast::ObjectExpression *object) {
+    ComplexValue ret_val;
+
+    for (const auto& member : object->members) {
+        ret_val.attributes.emplace(member.first, visit(member.second.get()));
     }
 
     return ret_val;
