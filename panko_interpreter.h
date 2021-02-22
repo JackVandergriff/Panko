@@ -23,12 +23,13 @@ namespace panko::runtime {
     struct ComplexValue;
     struct ReturnValue;
     struct Reference;
+    struct Array;
 
     struct Returning {};
 
     using Null = std::monostate;
-    using Value = util::invariant<int, double, bool, Null, ComplexValue, Returning, Reference>;
-    using WeakValue = std::variant<int, double, bool, Null, ComplexValue, Returning, Reference>;
+    using Value = util::invariant<int, double, bool, Null, ComplexValue, Returning, Reference, Array>;
+    using WeakValue = std::variant<int, double, bool, Null, ComplexValue, Returning, Reference, Array>;
 
     struct Reference {
         Value* value;
@@ -43,6 +44,10 @@ namespace panko::runtime {
         ComplexValue& operator=(const ComplexValue& other);
         ComplexValue(ComplexValue&&)=default;
         ComplexValue& operator=(ComplexValue&&)=default;
+    };
+
+    struct Array {
+        std::vector<Value> values;
     };
 
     std::ostream& operator<<(std::ostream& os, const Value& val);

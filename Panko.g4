@@ -30,9 +30,15 @@ expression : OPAREN expression CPAREN #paren_expr
  | FLOATLIT #float_lit
  | (TRUE | FALSE) #bool_lit;
 
-typed_identifier : type id=IDENTIFIER;
+type : OPAREN type CPAREN #paren_type
+ | type_unary_operator type #unary_type
+ | lhs=type type_binary_operator rhs=type #binary_type
+ | OBRACKET type (COMMA type)* CBRACKET #tuple_type
+ | OBRACKET type ELIPSIS CBRACKET #array_type
+ | (INT | FLOAT | KW_NULL) #builtin_type
+ | IDENTIFIER #id_type;
 
-type : IDENTIFIER | builtin_type;
+typed_identifier : type id=IDENTIFIER;
 
 argument_list : expression (COMMA expression)*;
 
@@ -50,6 +56,7 @@ type_decl : TYPE IDENTIFIER OBRACE ((vars+=var_decl SEMICLN) | funcs+=func_decl)
 
 object_var : IDENTIFIER COLON expression;
 
+
 // KEYWORDS
 
 TYPE : 'type';
@@ -65,8 +72,6 @@ FLOAT : 'float';
 RETURN : 'return';
 MODULE : 'module';
 IMPORT : 'import';
-
-builtin_type : INT | FLOAT | KW_NULL;
 
 // OPERATORS
 
@@ -88,9 +93,12 @@ BITOR : '|';
 BITAND : '&';
 BITNOT : '~';
 NOT : '!';
+ELIPSIS : '...';
 
 binary_operator : OR | AND | EQ | NEQ | GT | LT | GTEQ | LTEQ | ADD | SUB | MUL | DIV | MOD | XOR | BITAND | BITOR ;
 unary_operator : BITNOT | NOT;
+type_unary_operator : GT | LT | MUL;
+type_binary_operator : BITAND | BITOR;
 
 // ASSIGNMENT OPERATORS
 

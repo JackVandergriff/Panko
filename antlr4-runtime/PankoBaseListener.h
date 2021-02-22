@@ -67,11 +67,29 @@ public:
   virtual void enterBool_lit(PankoParser::Bool_litContext * /*ctx*/) override { }
   virtual void exitBool_lit(PankoParser::Bool_litContext * /*ctx*/) override { }
 
+  virtual void enterBuiltin_type(PankoParser::Builtin_typeContext * /*ctx*/) override { }
+  virtual void exitBuiltin_type(PankoParser::Builtin_typeContext * /*ctx*/) override { }
+
+  virtual void enterUnary_type(PankoParser::Unary_typeContext * /*ctx*/) override { }
+  virtual void exitUnary_type(PankoParser::Unary_typeContext * /*ctx*/) override { }
+
+  virtual void enterId_type(PankoParser::Id_typeContext * /*ctx*/) override { }
+  virtual void exitId_type(PankoParser::Id_typeContext * /*ctx*/) override { }
+
+  virtual void enterArray_type(PankoParser::Array_typeContext * /*ctx*/) override { }
+  virtual void exitArray_type(PankoParser::Array_typeContext * /*ctx*/) override { }
+
+  virtual void enterTuple_type(PankoParser::Tuple_typeContext * /*ctx*/) override { }
+  virtual void exitTuple_type(PankoParser::Tuple_typeContext * /*ctx*/) override { }
+
+  virtual void enterParen_type(PankoParser::Paren_typeContext * /*ctx*/) override { }
+  virtual void exitParen_type(PankoParser::Paren_typeContext * /*ctx*/) override { }
+
+  virtual void enterBinary_type(PankoParser::Binary_typeContext * /*ctx*/) override { }
+  virtual void exitBinary_type(PankoParser::Binary_typeContext * /*ctx*/) override { }
+
   virtual void enterTyped_identifier(PankoParser::Typed_identifierContext * /*ctx*/) override { }
   virtual void exitTyped_identifier(PankoParser::Typed_identifierContext * /*ctx*/) override { }
-
-  virtual void enterType(PankoParser::TypeContext * /*ctx*/) override { }
-  virtual void exitType(PankoParser::TypeContext * /*ctx*/) override { }
 
   virtual void enterArgument_list(PankoParser::Argument_listContext * /*ctx*/) override { }
   virtual void exitArgument_list(PankoParser::Argument_listContext * /*ctx*/) override { }
@@ -97,14 +115,17 @@ public:
   virtual void enterObject_var(PankoParser::Object_varContext * /*ctx*/) override { }
   virtual void exitObject_var(PankoParser::Object_varContext * /*ctx*/) override { }
 
-  virtual void enterBuiltin_type(PankoParser::Builtin_typeContext * /*ctx*/) override { }
-  virtual void exitBuiltin_type(PankoParser::Builtin_typeContext * /*ctx*/) override { }
-
   virtual void enterBinary_operator(PankoParser::Binary_operatorContext * /*ctx*/) override { }
   virtual void exitBinary_operator(PankoParser::Binary_operatorContext * /*ctx*/) override { }
 
   virtual void enterUnary_operator(PankoParser::Unary_operatorContext * /*ctx*/) override { }
   virtual void exitUnary_operator(PankoParser::Unary_operatorContext * /*ctx*/) override { }
+
+  virtual void enterType_unary_operator(PankoParser::Type_unary_operatorContext * /*ctx*/) override { }
+  virtual void exitType_unary_operator(PankoParser::Type_unary_operatorContext * /*ctx*/) override { }
+
+  virtual void enterType_binary_operator(PankoParser::Type_binary_operatorContext * /*ctx*/) override { }
+  virtual void exitType_binary_operator(PankoParser::Type_binary_operatorContext * /*ctx*/) override { }
 
   virtual void enterAssignment_operator(PankoParser::Assignment_operatorContext * /*ctx*/) override { }
   virtual void exitAssignment_operator(PankoParser::Assignment_operatorContext * /*ctx*/) override { }

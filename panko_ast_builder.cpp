@@ -269,3 +269,89 @@ ASTBuilder& ASTBuilder::appendFile(PankoParser& parser) {
 [[nodiscard]] const ast::AST& ASTBuilder::getTree() const {
     return built_ast;
 }
+
+antlrcpp::Any ASTBuilder::visitBuiltin_type(PankoParser::Builtin_typeContext *context) {
+    return util::string_hash{context->getText()};
+}
+
+antlrcpp::Any ASTBuilder::visitId_type(PankoParser::Id_typeContext *context) {
+    return util::string_hash{context->getText()};
+}
+
+antlrcpp::Any ASTBuilder::visitParen_type(PankoParser::Paren_typeContext *context) {
+    return context->type()->accept(this);
+}
+
+antlrcpp::Any ASTBuilder::visitTuple_type(PankoParser::Tuple_typeContext *context) {
+    ast::Type type{"tp__"};
+    type.op = ast::TypeOperator::TUPLE;
+
+    std::string name = "tp";
+    for (auto tuple_type : context->type()) {
+        type.other_types.push_back(tuple_type->accept(this).as<util::string_hash>());
+         name += "__" + (std::string)type.other_types.back();
+    }
+    type.name = name;
+
+    built_ast.types.make(std::move(type));
+    return util::string_hash{name};
+}
+
+antlrcpp::Any ASTBuilder::visitBinary_type(PankoParser::Binary_typeContext *context) {
+    ast::Type type{"bi__"};
+    std::string name;
+
+    auto op = context->type_binary_operator()->getText();
+    if (op == "&") {
+        type.op = ast::TypeOperator::CONJUNCTION;
+        name = "cj__";
+    } else if (op == "|") {
+        type.op = ast::TypeOperator::DISJUNCTION;
+        name = "dj__";
+    }
+
+    type.other_types.push_back(context->lhs->accept(this).as<util::string_hash>());
+    name += (std::string) type.other_types.back() + "__";
+    type.other_types.push_back(context->rhs->accept(this).as<util::string_hash>());
+    name += (std::string) type.other_types.back();
+
+    type.name = name;
+    built_ast.types.make(std::move(type));
+    return util::string_hash{name};
+}
+
+antlrcpp::Any ASTBuilder::visitUnary_type(PankoParser::Unary_typeContext *context) {
+    ast::Type type{"un__"};
+    std::string name;
+
+    auto op = context->type_unary_operator()->getText();
+    if (op == "*") {
+        type.op = ast::TypeOperator::REFERENCE;
+        name = "rf__";
+    } else if (op == "<") {
+        type.op = ast::TypeOperator::SUBSET;
+        name = "sb__";
+    } else if (op == ">") {
+        type.op = ast::TypeOperator::SUPERSET;
+        name = "sp__";
+    }
+
+    type.other_types.push_back(context->type()->accept(this).as<util::string_hash>());
+    name += (std::string) type.other_types.back();
+
+    type.name = name;
+    built_ast.types.make(std::move(type));
+    return util::string_hash{name};
+}
+
+antlrcpp::Any ASTBuilder::visitArray_type(PankoParser::Array_typeContext *context) {
+    ast::Type type{"ar__"};
+    type.op = ast::TypeOperator::ARRAY;
+
+    type.other_types.push_back(context->type()->accept(this).as<util::string_hash>());
+    type.name = "ar__" + (std::string) type.other_types.back();
+    auto name = type.name;
+
+    built_ast.types.make(std::move(type));
+    return name;
+}

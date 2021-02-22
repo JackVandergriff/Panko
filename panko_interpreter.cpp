@@ -35,6 +35,19 @@ std::ostream& panko::runtime::operator<<(std::ostream& os, const Value& val) {
         [&os](double val){ os << "Double: " << val; },
         [&os](bool val){ os << "Bool: " << val; },
         [&os](Reference val){ os << "Reference to " << *val.value; },
+        [&os](const Array& array) {
+            os << "Array: [";
+            bool first = true;
+            for (const auto& val : array.values) {
+                if (first) {
+                    first = false;
+                } else {
+                    os << ',';
+                }
+                os << val;
+            }
+            os << ']';
+        },
         [&os](Null){ os << "Null"; },
         [&os](Returning){ os << "Returning"; }
     );

@@ -83,11 +83,35 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitTyped_identifier(PankoParser::Typed_identifierContext *ctx) override {
+  virtual antlrcpp::Any visitBuiltin_type(PankoParser::Builtin_typeContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitType(PankoParser::TypeContext *ctx) override {
+  virtual antlrcpp::Any visitUnary_type(PankoParser::Unary_typeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitId_type(PankoParser::Id_typeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitArray_type(PankoParser::Array_typeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitTuple_type(PankoParser::Tuple_typeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitParen_type(PankoParser::Paren_typeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitBinary_type(PankoParser::Binary_typeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitTyped_identifier(PankoParser::Typed_identifierContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -123,15 +147,19 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitBuiltin_type(PankoParser::Builtin_typeContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitBinary_operator(PankoParser::Binary_operatorContext *ctx) override {
     return visitChildren(ctx);
   }
 
   virtual antlrcpp::Any visitUnary_operator(PankoParser::Unary_operatorContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitType_unary_operator(PankoParser::Type_unary_operatorContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitType_binary_operator(PankoParser::Type_binary_operatorContext *ctx) override {
     return visitChildren(ctx);
   }
 

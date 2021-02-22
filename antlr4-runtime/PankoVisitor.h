@@ -53,9 +53,21 @@ public:
 
     virtual antlrcpp::Any visitBool_lit(PankoParser::Bool_litContext *context) = 0;
 
-    virtual antlrcpp::Any visitTyped_identifier(PankoParser::Typed_identifierContext *context) = 0;
+    virtual antlrcpp::Any visitBuiltin_type(PankoParser::Builtin_typeContext *context) = 0;
 
-    virtual antlrcpp::Any visitType(PankoParser::TypeContext *context) = 0;
+    virtual antlrcpp::Any visitUnary_type(PankoParser::Unary_typeContext *context) = 0;
+
+    virtual antlrcpp::Any visitId_type(PankoParser::Id_typeContext *context) = 0;
+
+    virtual antlrcpp::Any visitArray_type(PankoParser::Array_typeContext *context) = 0;
+
+    virtual antlrcpp::Any visitTuple_type(PankoParser::Tuple_typeContext *context) = 0;
+
+    virtual antlrcpp::Any visitParen_type(PankoParser::Paren_typeContext *context) = 0;
+
+    virtual antlrcpp::Any visitBinary_type(PankoParser::Binary_typeContext *context) = 0;
+
+    virtual antlrcpp::Any visitTyped_identifier(PankoParser::Typed_identifierContext *context) = 0;
 
     virtual antlrcpp::Any visitArgument_list(PankoParser::Argument_listContext *context) = 0;
 
@@ -73,11 +85,13 @@ public:
 
     virtual antlrcpp::Any visitObject_var(PankoParser::Object_varContext *context) = 0;
 
-    virtual antlrcpp::Any visitBuiltin_type(PankoParser::Builtin_typeContext *context) = 0;
-
     virtual antlrcpp::Any visitBinary_operator(PankoParser::Binary_operatorContext *context) = 0;
 
     virtual antlrcpp::Any visitUnary_operator(PankoParser::Unary_operatorContext *context) = 0;
+
+    virtual antlrcpp::Any visitType_unary_operator(PankoParser::Type_unary_operatorContext *context) = 0;
+
+    virtual antlrcpp::Any visitType_binary_operator(PankoParser::Type_binary_operatorContext *context) = 0;
 
     virtual antlrcpp::Any visitAssignment_operator(PankoParser::Assignment_operatorContext *context) = 0;
 

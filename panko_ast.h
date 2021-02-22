@@ -24,6 +24,10 @@ namespace panko::ast {
         BITNOT, NOT
     };
 
+    enum class TypeOperator {
+        BASIC, SUBSET, SUPERSET, REFERENCE, CONJUNCTION, DISJUNCTION, TUPLE, ARRAY
+    };
+
     struct Node {
         virtual ~Node() = default;
     };
@@ -48,9 +52,11 @@ namespace panko::ast {
 
     struct Type {
         util::string_hash name;
+        TypeOperator op{TypeOperator::BASIC};
 
         std::vector<Variable> attributes;
         std::vector<Function> methods;
+        std::vector<util::string_hash> other_types;
 
         explicit Type(const std::string& name): name{name} {}
     };
