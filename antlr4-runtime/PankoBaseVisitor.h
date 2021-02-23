@@ -39,10 +39,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitUnary_expr(PankoParser::Unary_exprContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitAccess_expr(PankoParser::Access_exprContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -67,19 +63,27 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitInt_lit(PankoParser::Int_litContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitFloat_lit(PankoParser::Float_litContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitObj_expr(PankoParser::Obj_exprContext *ctx) override {
     return visitChildren(ctx);
   }
 
   virtual antlrcpp::Any visitBool_lit(PankoParser::Bool_litContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitArray_expr(PankoParser::Array_exprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitUnary_expr(PankoParser::Unary_exprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitInt_lit(PankoParser::Int_litContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitFloat_lit(PankoParser::Float_litContext *ctx) override {
     return visitChildren(ctx);
   }
 

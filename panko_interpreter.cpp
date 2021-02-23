@@ -24,29 +24,32 @@ std::ostream& panko::runtime::operator<<(std::ostream& os, const Value& val) {
 
     util::visit(val.getVariant(),
         [&os](const ComplexValue& val) {
-            os << "Type:";
+            os << "Object: {";
             tab_depth++;
             for (const auto &kv : val.attributes) {
                 os << '\n' << std::string(tab_depth * 2, ' ') << '"' << (std::string)kv.first << "\" = " << kv.second;
             }
             tab_depth--;
+            os << '\n' << std::string(tab_depth * 2, ' ') << '}';
         },
         [&os](int val){ os << "Int: " << val; },
         [&os](double val){ os << "Double: " << val; },
         [&os](bool val){ os << "Bool: " << val; },
         [&os](Reference val){ os << "Reference to " << *val.value; },
         [&os](const Array& array) {
-            os << "Array: [";
+            tab_depth++;
+            os << "Array: [\n" << std::string(tab_depth * 2, ' ');
             bool first = true;
             for (const auto& val : array.values) {
                 if (first) {
                     first = false;
                 } else {
-                    os << ',';
+                    os << ",\n" << std::string(tab_depth * 2, ' ');
                 }
                 os << val;
             }
-            os << ']';
+            tab_depth--;
+            os << '\n' << std::string(tab_depth * 2, ' ') << ']';
         },
         [&os](Null){ os << "Null"; },
         [&os](Returning){ os << "Returning"; }
@@ -122,22 +125,40 @@ const ast::Function* Interpreter::findFunction(const ast::Identifier& id) {
     }
 }
 
-Value Interpreter::constructValue(const ast::Type& type) {
-    if (type.name == util::string_hash{"int"}) {
-        return Value{std::in_place_type<int>};
-    } else if (type.name == util::string_hash{"float"}) {
-        return Value{std::in_place_type<double>};
-    } else if (type.name == util::string_hash{"bool"}) {
-        return Value{std::in_place_type<bool>};
-    } else {
-        ComplexValue val{};
-
-        for (const auto& attr : type.attributes) {
-            val.attributes.emplace(attr.name, constructValue(*findType(attr.type)));
-        }
-
-        return val;
+Value Interpreter::constructValue(const ast::TypeIdentifier* type) {
+    switch (type->op) {
+        case ast::TypeOperator::BASIC: { // Need block to be able to initialize new variables (dumb)
+            const auto actual = findType(type->id);
+            if (actual->name == util::string_hash{"int"}) {
+                return Value{std::in_place_type<int>};
+            } else if (actual->name == util::string_hash{"float"}) {
+                return Value{std::in_place_type<double>};
+            } else if (actual->name == util::string_hash{"bool"}) {
+                return Value{std::in_place_type<bool>};
+            } else {
+                ComplexValue val{};
+                for (const auto &attr : actual->attributes) {
+                    val.attributes.emplace(attr.name, constructValue(attr.type.get()));
+                }
+                return val;
+            }
+        } case ast::TypeOperator::SUBSET:
+            break;
+        case ast::TypeOperator::SUPERSET:
+            break;
+        case ast::TypeOperator::REFERENCE:
+            break;
+        case ast::TypeOperator::CONJUNCTION:
+            break;
+        case ast::TypeOperator::DISJUNCTION:
+            break;
+        case ast::TypeOperator::TUPLE:
+            break;
+        case ast::TypeOperator::ARRAY:
+            return Array{type->other_types.at(0).get()};
     }
+
+    return Value{};
 }
 
 Reference Interpreter::makeReference(const ast::Identifier& id) {
@@ -263,13 +284,7 @@ Value Interpreter::visitBoolLiteral(ast::BoolLiteral* literal) {
 Value Interpreter::visitVariableDeclaration(ast::VariableDeclaration *var_decl) {
     auto var = ast.variables.get(var_decl->variable);
     if (var) {
-        auto type = findType(var->type);
-        if (type) {
-            values.emplace(var_decl->variable, constructValue(*type));
-        } else {
-            std::cerr << "TYPE NOT FOUND!";
-            std::terminate();
-        }
+        values.emplace(var_decl->variable, constructValue(var->type.get()));
     } else {
         std::cerr << "VARIABLE NOT FOUND!";
         std::terminate();
@@ -361,11 +376,7 @@ Value Interpreter::visitFunctionCall(ast::FunctionCall* call) {
     Value ret_val;
 
     if (func) {
-        auto type = findType(func->return_type);
-
-        if (type) {
-            ret_val = constructValue(*type);
-        }
+        ret_val = constructValue(func->return_type.get());
     }
 
     std::vector<size_t> param_hashes;
@@ -377,7 +388,7 @@ Value Interpreter::visitFunctionCall(ast::FunctionCall* call) {
             param_hashes.emplace_back(params.make(
                 // Have to use call_stack_size + 1 so visiting parameter expressions still work
                 util::string_hash{static_cast<std::string>(cur.name) + std::to_string(call_stack_size + 1)},
-                std::ref(cur.type)
+                std::make_unique<ast::TypeIdentifier>(cur.type->clone())
             )),
             removeReference(visit(call->arguments.at(i).get()))
         );
@@ -418,6 +429,16 @@ Value Interpreter::visitObjectExpression(ast::ObjectExpression *object) {
 
     for (const auto& member : object->members) {
         ret_val.attributes.emplace(member.first, visit(member.second.get()));
+    }
+
+    return ret_val;
+}
+
+Value Interpreter::visitArrayExpression(ast::ArrayExpression *array) {
+    Array ret_val;
+
+    for (const auto& member : array->members) {
+        ret_val.values.push_back(visit(member.get()));
     }
 
     return ret_val;

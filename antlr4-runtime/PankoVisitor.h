@@ -31,8 +31,6 @@ public:
 
     virtual antlrcpp::Any visitParen_expr(PankoParser::Paren_exprContext *context) = 0;
 
-    virtual antlrcpp::Any visitUnary_expr(PankoParser::Unary_exprContext *context) = 0;
-
     virtual antlrcpp::Any visitAccess_expr(PankoParser::Access_exprContext *context) = 0;
 
     virtual antlrcpp::Any visitComplex_assignment(PankoParser::Complex_assignmentContext *context) = 0;
@@ -45,13 +43,17 @@ public:
 
     virtual antlrcpp::Any visitFunc_expr(PankoParser::Func_exprContext *context) = 0;
 
-    virtual antlrcpp::Any visitInt_lit(PankoParser::Int_litContext *context) = 0;
-
-    virtual antlrcpp::Any visitFloat_lit(PankoParser::Float_litContext *context) = 0;
-
     virtual antlrcpp::Any visitObj_expr(PankoParser::Obj_exprContext *context) = 0;
 
     virtual antlrcpp::Any visitBool_lit(PankoParser::Bool_litContext *context) = 0;
+
+    virtual antlrcpp::Any visitArray_expr(PankoParser::Array_exprContext *context) = 0;
+
+    virtual antlrcpp::Any visitUnary_expr(PankoParser::Unary_exprContext *context) = 0;
+
+    virtual antlrcpp::Any visitInt_lit(PankoParser::Int_litContext *context) = 0;
+
+    virtual antlrcpp::Any visitFloat_lit(PankoParser::Float_litContext *context) = 0;
 
     virtual antlrcpp::Any visitBuiltin_type(PankoParser::Builtin_typeContext *context) = 0;
 

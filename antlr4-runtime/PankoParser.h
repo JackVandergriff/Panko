@@ -195,18 +195,6 @@ public:
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
-  class  Unary_exprContext : public ExpressionContext {
-  public:
-    Unary_exprContext(ExpressionContext *ctx);
-
-    Unary_operatorContext *unary_operator();
-    ExpressionContext *expression();
-    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
-    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
   class  Access_exprContext : public ExpressionContext {
   public:
     Access_exprContext(ExpressionContext *ctx);
@@ -293,28 +281,6 @@ public:
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
-  class  Int_litContext : public ExpressionContext {
-  public:
-    Int_litContext(ExpressionContext *ctx);
-
-    antlr4::tree::TerminalNode *INTLIT();
-    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
-    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
-  class  Float_litContext : public ExpressionContext {
-  public:
-    Float_litContext(ExpressionContext *ctx);
-
-    antlr4::tree::TerminalNode *FLOATLIT();
-    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
-    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
   class  Obj_exprContext : public ExpressionContext {
   public:
     Obj_exprContext(ExpressionContext *ctx);
@@ -337,6 +303,56 @@ public:
 
     antlr4::tree::TerminalNode *TRUE();
     antlr4::tree::TerminalNode *FALSE();
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  Array_exprContext : public ExpressionContext {
+  public:
+    Array_exprContext(ExpressionContext *ctx);
+
+    antlr4::tree::TerminalNode *OBRACKET();
+    std::vector<ExpressionContext *> expression();
+    ExpressionContext* expression(size_t i);
+    antlr4::tree::TerminalNode *CBRACKET();
+    std::vector<antlr4::tree::TerminalNode *> COMMA();
+    antlr4::tree::TerminalNode* COMMA(size_t i);
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  Unary_exprContext : public ExpressionContext {
+  public:
+    Unary_exprContext(ExpressionContext *ctx);
+
+    Unary_operatorContext *unary_operator();
+    ExpressionContext *expression();
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  Int_litContext : public ExpressionContext {
+  public:
+    Int_litContext(ExpressionContext *ctx);
+
+    antlr4::tree::TerminalNode *INTLIT();
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  Float_litContext : public ExpressionContext {
+  public:
+    Float_litContext(ExpressionContext *ctx);
+
+    antlr4::tree::TerminalNode *FLOATLIT();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 

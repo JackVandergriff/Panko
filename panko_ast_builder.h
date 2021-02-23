@@ -48,6 +48,7 @@ namespace panko {
         antlrcpp::Any visitBinary_type(PankoParser::Binary_typeContext *context) override;
         antlrcpp::Any visitUnary_type(PankoParser::Unary_typeContext *context) override;
         antlrcpp::Any visitArray_type(PankoParser::Array_typeContext *context) override;
+        antlrcpp::Any visitArray_expr(PankoParser::Array_exprContext *context) override;
 
         template<typename T>
         std::unique_ptr<T> make_unique_any(antlrcpp::Any any) {

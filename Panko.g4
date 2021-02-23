@@ -25,6 +25,7 @@ expression : OPAREN expression CPAREN #paren_expr
  | expression op=(INC | DEC) #complex_assignment
  | initial=IDENTIFIER (PERIOD accessors+=IDENTIFIER)+ #access_expr
  | OBRACE (object_var COMMA)* object_var CBRACE #obj_expr
+ | OBRACKET (expression COMMA)* expression CBRACKET #array_expr
  | IDENTIFIER #id_expr
  | INTLIT #int_lit
  | FLOATLIT #float_lit

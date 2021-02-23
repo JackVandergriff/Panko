@@ -35,6 +35,7 @@ namespace panko::ast {
         virtual T visitTypeDeclaration(TypeDeclaration*)=0;
         virtual T visitAccessExpression(AccessExpression*)=0;
         virtual T visitObjectExpression(ObjectExpression*)=0;
+        virtual T visitArrayExpression(ArrayExpression*)=0;
 
         T visit(Node* node) { // Will dispatch to most specified type
             if (auto statement = dynamic_cast<Statement*>(node)) {
@@ -61,6 +62,8 @@ namespace panko::ast {
                         return visitAccessExpression(access);
                     } else if (auto obj = dynamic_cast<ObjectExpression*>(expression)) {
                         return visitObjectExpression(obj);
+                    } else if (auto arr = dynamic_cast<ArrayExpression*>(expression)) {
+                        return visitArrayExpression(arr);
                     } else {
                         return visitExpression(expression);
                     }
@@ -91,81 +94,26 @@ namespace panko::ast {
 
     template<typename T>
     struct BaseVisitor : Visitor<T> {
-        T visitFile(File*) override {
-            return T();
-        }
-
-        T visitBlock(Block*) override {
-            return T();
-        }
-
-        T visitStatement(Statement *statement) override {
-            return this->visit(statement);
-        }
-
-        T visitExpression(Expression *expression) override {
-            return this->visit(expression);
-        }
-
-        T visitIntegerLiteral(IntegerLiteral*) override {
-            return T();
-        }
-
-        T visitFloatLiteral(FloatLiteral*) override {
-            return T();
-        }
-
-        T visitBoolLiteral(BoolLiteral*) override {
-            return T();
-        }
-
-        T visitFunctionCall(FunctionCall*) override {
-            return T();
-        }
-
-        T visitBinaryOperatorExpression(BinaryOperatorExpression*) override {
-            return T();
-        }
-
-        T visitUnaryOperatorExpression(UnaryOperatorExpression*) override {
-            return T();
-        }
-
-        T visitVariableExpression(VariableExpression*) override {
-            return T();
-        }
-
-        T visitVariableDeclaration(VariableDeclaration*) override {
-            return T();
-        }
-
-        T visitComplexAssignment(ComplexAssignment*) override {
-            return T();
-        }
-
-        T visitSimpleAssignment(SimpleAssignment*) override {
-            return T();
-        }
-
-        T visitWhileLoop(WhileLoop*) override {
-            return T();
-        }
-
-        T visitFunctionDeclaration(FunctionDeclaration*) override {
-            return T();
-        }
-
-        T visitTypeDeclaration(TypeDeclaration*) override {
-            return T();
-        }
-
-        T visitAccessExpression(AccessExpression*) override {
-            return T();
-        }
-
-        T visitObjectExpression(ObjectExpression*) override {
-            return T();
-        }
+        T visitFile(File*) override { return T(); }
+        T visitBlock(Block*) override { return T(); }
+        T visitStatement(Statement *statement) override { return this->visit(statement); }
+        T visitExpression(Expression *expression) override { return this->visit(expression); }
+        T visitIntegerLiteral(IntegerLiteral*) override { return T(); }
+        T visitFloatLiteral(FloatLiteral*) override { return T(); }
+        T visitBoolLiteral(BoolLiteral*) override { return T(); }
+        T visitFunctionCall(FunctionCall*) override { return T(); }
+        T visitBinaryOperatorExpression(BinaryOperatorExpression*) override { return T(); }
+        T visitUnaryOperatorExpression(UnaryOperatorExpression*) override { return T(); }
+        T visitVariableExpression(VariableExpression*) override { return T(); }
+        T visitVariableDeclaration(VariableDeclaration*) override { return T(); }
+        T visitComplexAssignment(ComplexAssignment*) override { return T(); }
+        T visitSimpleAssignment(SimpleAssignment*) override { return T(); }
+        T visitWhileLoop(WhileLoop*) override { return T(); }
+        T visitFunctionDeclaration(FunctionDeclaration*) override { return T(); }
+        T visitTypeDeclaration(TypeDeclaration*) override { return T(); }
+        T visitAccessExpression(AccessExpression*) override { return T(); }
+        T visitObjectExpression(ObjectExpression*) override { return T(); }
+        T visitArrayExpression(ArrayExpression*) override { return T(); }
     };
 }
 

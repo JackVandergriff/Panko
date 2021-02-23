@@ -63,10 +63,10 @@ namespace panko::util {
 
     struct string_hash {
     private:
-        static inline std::map<size_t, std::string> hash_map{};
-        size_t hash;
+        static inline std::map<size_t, std::string> hash_map{{0, ""}};
+        size_t hash{};
     public:
-
+        string_hash() = default;
         string_hash(const std::string& str);
         string_hash(const char* str);
         explicit operator std::string() const;

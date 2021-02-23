@@ -47,7 +47,15 @@ namespace panko::runtime {
     };
 
     struct Array {
+        const ast::TypeIdentifier* check = nullptr;
         std::vector<Value> values;
+
+        Array() = default;
+        explicit Array(const ast::TypeIdentifier* check) : check{check} {}
+
+        Value& operator[](size_t index) {
+            return values.at(index);
+        }
     };
 
     std::ostream& operator<<(std::ostream& os, const Value& val);
@@ -72,7 +80,7 @@ namespace panko::runtime {
         const ast::Type* findType(const ast::Identifier& id);
         const ast::Function* findFunction(const ast::Identifier& id);
 
-        Value constructValue(const ast::Type& type);
+        Value constructValue(const ast::TypeIdentifier* type);
 
         Value visitFile(ast::File *file) override;
         Value visitBinaryOperatorExpression(ast::BinaryOperatorExpression *expression) override;
@@ -93,6 +101,7 @@ namespace panko::runtime {
         Value visitTypeDeclaration(ast::TypeDeclaration*) override;
         Value visitAccessExpression(ast::AccessExpression* access) override;
         Value visitObjectExpression(ast::ObjectExpression* object) override;
+        Value visitArrayExpression(ast::ArrayExpression* array) override;
     };
 }
 

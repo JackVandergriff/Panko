@@ -32,9 +32,6 @@ public:
   virtual void enterParen_expr(PankoParser::Paren_exprContext *ctx) = 0;
   virtual void exitParen_expr(PankoParser::Paren_exprContext *ctx) = 0;
 
-  virtual void enterUnary_expr(PankoParser::Unary_exprContext *ctx) = 0;
-  virtual void exitUnary_expr(PankoParser::Unary_exprContext *ctx) = 0;
-
   virtual void enterAccess_expr(PankoParser::Access_exprContext *ctx) = 0;
   virtual void exitAccess_expr(PankoParser::Access_exprContext *ctx) = 0;
 
@@ -53,17 +50,23 @@ public:
   virtual void enterFunc_expr(PankoParser::Func_exprContext *ctx) = 0;
   virtual void exitFunc_expr(PankoParser::Func_exprContext *ctx) = 0;
 
-  virtual void enterInt_lit(PankoParser::Int_litContext *ctx) = 0;
-  virtual void exitInt_lit(PankoParser::Int_litContext *ctx) = 0;
-
-  virtual void enterFloat_lit(PankoParser::Float_litContext *ctx) = 0;
-  virtual void exitFloat_lit(PankoParser::Float_litContext *ctx) = 0;
-
   virtual void enterObj_expr(PankoParser::Obj_exprContext *ctx) = 0;
   virtual void exitObj_expr(PankoParser::Obj_exprContext *ctx) = 0;
 
   virtual void enterBool_lit(PankoParser::Bool_litContext *ctx) = 0;
   virtual void exitBool_lit(PankoParser::Bool_litContext *ctx) = 0;
+
+  virtual void enterArray_expr(PankoParser::Array_exprContext *ctx) = 0;
+  virtual void exitArray_expr(PankoParser::Array_exprContext *ctx) = 0;
+
+  virtual void enterUnary_expr(PankoParser::Unary_exprContext *ctx) = 0;
+  virtual void exitUnary_expr(PankoParser::Unary_exprContext *ctx) = 0;
+
+  virtual void enterInt_lit(PankoParser::Int_litContext *ctx) = 0;
+  virtual void exitInt_lit(PankoParser::Int_litContext *ctx) = 0;
+
+  virtual void enterFloat_lit(PankoParser::Float_litContext *ctx) = 0;
+  virtual void exitFloat_lit(PankoParser::Float_litContext *ctx) = 0;
 
   virtual void enterBuiltin_type(PankoParser::Builtin_typeContext *ctx) = 0;
   virtual void exitBuiltin_type(PankoParser::Builtin_typeContext *ctx) = 0;

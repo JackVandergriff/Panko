@@ -39,3 +39,5 @@ line l1 = {
 };
 
 get_vector(l1);
+
+[int...] wowzers = [1, 2, {x: 2, y: 3, array_boi : [4, 5, 6]}];

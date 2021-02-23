@@ -34,9 +34,6 @@ public:
   virtual void enterParen_expr(PankoParser::Paren_exprContext * /*ctx*/) override { }
   virtual void exitParen_expr(PankoParser::Paren_exprContext * /*ctx*/) override { }
 
-  virtual void enterUnary_expr(PankoParser::Unary_exprContext * /*ctx*/) override { }
-  virtual void exitUnary_expr(PankoParser::Unary_exprContext * /*ctx*/) override { }
-
   virtual void enterAccess_expr(PankoParser::Access_exprContext * /*ctx*/) override { }
   virtual void exitAccess_expr(PankoParser::Access_exprContext * /*ctx*/) override { }
 
@@ -55,17 +52,23 @@ public:
   virtual void enterFunc_expr(PankoParser::Func_exprContext * /*ctx*/) override { }
   virtual void exitFunc_expr(PankoParser::Func_exprContext * /*ctx*/) override { }
 
-  virtual void enterInt_lit(PankoParser::Int_litContext * /*ctx*/) override { }
-  virtual void exitInt_lit(PankoParser::Int_litContext * /*ctx*/) override { }
-
-  virtual void enterFloat_lit(PankoParser::Float_litContext * /*ctx*/) override { }
-  virtual void exitFloat_lit(PankoParser::Float_litContext * /*ctx*/) override { }
-
   virtual void enterObj_expr(PankoParser::Obj_exprContext * /*ctx*/) override { }
   virtual void exitObj_expr(PankoParser::Obj_exprContext * /*ctx*/) override { }
 
   virtual void enterBool_lit(PankoParser::Bool_litContext * /*ctx*/) override { }
   virtual void exitBool_lit(PankoParser::Bool_litContext * /*ctx*/) override { }
+
+  virtual void enterArray_expr(PankoParser::Array_exprContext * /*ctx*/) override { }
+  virtual void exitArray_expr(PankoParser::Array_exprContext * /*ctx*/) override { }
+
+  virtual void enterUnary_expr(PankoParser::Unary_exprContext * /*ctx*/) override { }
+  virtual void exitUnary_expr(PankoParser::Unary_exprContext * /*ctx*/) override { }
+
+  virtual void enterInt_lit(PankoParser::Int_litContext * /*ctx*/) override { }
+  virtual void exitInt_lit(PankoParser::Int_litContext * /*ctx*/) override { }
+
+  virtual void enterFloat_lit(PankoParser::Float_litContext * /*ctx*/) override { }
+  virtual void exitFloat_lit(PankoParser::Float_litContext * /*ctx*/) override { }
 
   virtual void enterBuiltin_type(PankoParser::Builtin_typeContext * /*ctx*/) override { }
   virtual void exitBuiltin_type(PankoParser::Builtin_typeContext * /*ctx*/) override { }

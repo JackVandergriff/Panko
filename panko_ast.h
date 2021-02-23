@@ -52,28 +52,44 @@ namespace panko::ast {
 
     struct Type {
         util::string_hash name;
-        TypeOperator op{TypeOperator::BASIC};
 
         std::vector<Variable> attributes;
         std::vector<Function> methods;
-        std::vector<util::string_hash> other_types;
 
+        Type() = default;
         explicit Type(const std::string& name): name{name} {}
+    };
+
+    struct TypeIdentifier : Node {
+        Identifier id;
+        TypeOperator op{TypeOperator::BASIC};
+
+        std::vector<std::unique_ptr<TypeIdentifier>> other_types;
+
+        [[nodiscard]] TypeIdentifier clone() const {
+            TypeIdentifier ret_val;
+            ret_val.id = id;
+            ret_val.op = op;
+            for (const auto& ptr : other_types) {
+                ret_val.other_types.push_back(std::make_unique<TypeIdentifier>(ptr->clone()));
+            }
+            return ret_val;
+        }
     };
 
     struct Variable {
         util::string_hash name;
-        Identifier type;
+        std::unique_ptr<TypeIdentifier> type;
 
         explicit Variable(const std::string& name): name{name} {}
-        Variable(util::string_hash name, Identifier type) : name{name}, type{std::move(type)} {}
+        Variable(util::string_hash name, std::unique_ptr<TypeIdentifier> type) : name{name}, type{std::move(type)} {}
     };
 
     struct Function {
         util::string_hash name;
 
         std::vector<Variable> parameters;
-        Identifier return_type;
+        std::unique_ptr<TypeIdentifier> return_type;
         std::unique_ptr<Block> body;
 
         explicit Function(const std::string& name): name{name} {}
@@ -193,6 +209,10 @@ namespace panko::ast {
 
     struct ObjectExpression : Expression {
         std::vector<std::pair<util::string_hash, std::unique_ptr<Expression>>> members;
+    };
+
+    struct ArrayExpression : Expression {
+        std::vector<std::unique_ptr<Expression>> members;
     };
 
     struct AST {
