@@ -24,14 +24,16 @@ namespace panko::runtime {
     struct ReturnValue;
     struct Reference;
     struct Array;
+    struct Tuple;
+    struct Interpreter;
 
     struct Returning {};
 
     using Null = std::monostate;
-    using Value = util::invariant<int, double, bool, Null, ComplexValue, Returning, Reference, Array>;
-    using WeakValue = std::variant<int, double, bool, Null, ComplexValue, Returning, Reference, Array>;
+    using Value = util::invariant<int, double, bool, Null, ComplexValue, Returning, Reference, Array, Tuple>;
 
     struct Reference {
+        const ast::TypeIdentifier* type;
         Value* value;
     };
 
@@ -43,20 +45,41 @@ namespace panko::runtime {
 
         ComplexValue& operator=(const ComplexValue& other);
         ComplexValue(ComplexValue&&)=default;
-        ComplexValue& operator=(ComplexValue&&)=default;
+        ComplexValue& operator=(ComplexValue&& other); // Can't be noexcept, could throw BadTypeConversion
     };
 
     struct Array {
-        const ast::TypeIdentifier* check = nullptr;
+        const ast::TypeIdentifier* type = nullptr;
+        const Interpreter* interpreter = nullptr; // Needs access to remove_reference for conversions
         std::vector<Value> values;
 
-        Array() = default;
-        explicit Array(const ast::TypeIdentifier* check) : check{check} {}
+        Array() = delete;
+        explicit Array(const ast::TypeIdentifier* type, const Interpreter* interpreter): type{type}, interpreter{interpreter} {}
 
         Value& operator[](size_t index) {
             return values.at(index);
         }
+
+        Array(const Array&)=default;
+        Array& operator=(const Array& other);
+        Array(Array&&)=default;
+        Array& operator=(Array&&)=default;
     };
+
+    struct Tuple {
+        const Interpreter* interpreter = nullptr; // Needs access to remove_reference for conversions
+        std::vector<const ast::TypeIdentifier*> types;
+        std::vector<Value> values;
+
+        Tuple()=delete;
+        explicit Tuple(const Interpreter* interpreter) : interpreter{interpreter} {}
+        Tuple(const Tuple&)=default;
+        Tuple& operator=(const Tuple& other);
+        Tuple(Tuple&&)=default;
+        Tuple& operator=(Tuple&&)=default;
+    };
+
+    using WeakValue = std::remove_cvref_t<decltype(Value{}.getVariant())>; // Get the variant inside Value
 
     std::ostream& operator<<(std::ostream& os, const Value& val);
 
@@ -74,13 +97,14 @@ namespace panko::runtime {
         static Value& getReferenceValue(const Value& ref);
         Reference makeReference(const ast::Identifier& id);
 
-        std::tuple<size_t, const ast::Variable*> findVariableAndHash(const ast::Identifier& id);
-        const ast::Variable* findVariable(const ast::Identifier& id);
-        Value& findValue(const ast::Identifier& id);
-        const ast::Type* findType(const ast::Identifier& id);
-        const ast::Function* findFunction(const ast::Identifier& id);
+        Value convert(const Value& other, const ast::TypeIdentifier* type) const;
+        [[nodiscard]] std::tuple<size_t, const ast::Variable*> findVariableAndHash(const ast::Identifier& id) const;
+        [[nodiscard]] const ast::Variable* findVariable(const ast::Identifier& id) const;
+        [[nodiscard]] Value& findValue(const ast::Identifier& id);
+        [[nodiscard]] const ast::Type* findType(const ast::Identifier& id) const;
+        [[nodiscard]] const ast::Function* findFunction(const ast::Identifier& id) const;
 
-        Value constructValue(const ast::TypeIdentifier* type);
+        Value constructValue(const ast::TypeIdentifier* type) const;
 
         Value visitFile(ast::File *file) override;
         Value visitBinaryOperatorExpression(ast::BinaryOperatorExpression *expression) override;

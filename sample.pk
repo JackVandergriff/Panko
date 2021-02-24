@@ -40,4 +40,8 @@ line l1 = {
 
 get_vector(l1);
 
-[int...] wowzers = [1, 2, {x: 2, y: 3, array_boi : [4, 5, 6]}];
+false;
+[int...] wowzers = [1, 2, 3 + l1.p2.x];
+[point...] points = [l1.p1, l1.p2, {x : 3, y: 4}];
+
+[bool, point] tupleboi = [false, l1.p2];

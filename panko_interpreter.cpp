@@ -4,6 +4,8 @@
 
 #include "panko_interpreter.h"
 
+#include <utility>
+
 using namespace panko::runtime;
 using namespace panko;
 
@@ -16,6 +18,11 @@ ComplexValue& ComplexValue::operator=(const ComplexValue &other) {
         kv.second = other.attributes.at(kv.first);
     }
 
+    return *this;
+}
+
+ComplexValue &ComplexValue::operator=(ComplexValue&& other) {
+    *this = other;
     return *this;
 }
 
@@ -36,9 +43,14 @@ std::ostream& panko::runtime::operator<<(std::ostream& os, const Value& val) {
         [&os](double val){ os << "Double: " << val; },
         [&os](bool val){ os << "Bool: " << val; },
         [&os](Reference val){ os << "Reference to " << *val.value; },
-        [&os](const Array& array) {
+        [&os](const auto& array) {
             tab_depth++;
-            os << "Array: [\n" << std::string(tab_depth * 2, ' ');
+            if constexpr (std::is_same_v<std::remove_cvref_t<decltype(array)>, Array>) {
+                os << "Array: ";
+            } else {
+                os << "Tuple: ";
+            }
+            os << "[\n" << std::string(tab_depth * 2, ' ');
             bool first = true;
             for (const auto& val : array.values) {
                 if (first) {
@@ -80,7 +92,7 @@ Value& Interpreter::getReferenceValue(const Value& ref) {
     }
 }
 
-std::tuple<size_t, const ast::Variable*> Interpreter::findVariableAndHash(const ast::Identifier& id) {
+std::tuple<size_t, const ast::Variable*> Interpreter::findVariableAndHash(const ast::Identifier& id) const {
     auto var = id.context.lookup(id.identifier, ast.variables);
 
     if (std::get<const ast::Variable*>(var)) {
@@ -96,7 +108,7 @@ std::tuple<size_t, const ast::Variable*> Interpreter::findVariableAndHash(const 
     }
 }
 
-const ast::Variable* Interpreter::findVariable(const ast::Identifier& id) {
+const ast::Variable* Interpreter::findVariable(const ast::Identifier& id) const {
     return std::get<const ast::Variable*>(findVariableAndHash(id));
 }
 
@@ -109,7 +121,7 @@ Value& Interpreter::findValue(const ast::Identifier& id) {
     }
 }
 
-const ast::Type* Interpreter::findType(const ast::Identifier& id) {
+const ast::Type* Interpreter::findType(const ast::Identifier& id) const {
     if (auto type = std::get<const ast::Type*>(id.context.lookup(id.identifier, ast.types))) {
         return type;
     } else {
@@ -117,7 +129,7 @@ const ast::Type* Interpreter::findType(const ast::Identifier& id) {
     }
 }
 
-const ast::Function* Interpreter::findFunction(const ast::Identifier& id) {
+const ast::Function* Interpreter::findFunction(const ast::Identifier& id) const {
     if (auto func = std::get<const ast::Function*>(id.context.lookup(id.identifier, ast.functions))) {
         return func;
     } else {
@@ -125,7 +137,7 @@ const ast::Function* Interpreter::findFunction(const ast::Identifier& id) {
     }
 }
 
-Value Interpreter::constructValue(const ast::TypeIdentifier* type) {
+Value Interpreter::constructValue(const ast::TypeIdentifier* type) const {
     switch (type->op) {
         case ast::TypeOperator::BASIC: { // Need block to be able to initialize new variables (dumb)
             const auto actual = findType(type->id);
@@ -152,17 +164,23 @@ Value Interpreter::constructValue(const ast::TypeIdentifier* type) {
             break;
         case ast::TypeOperator::DISJUNCTION:
             break;
-        case ast::TypeOperator::TUPLE:
-            break;
-        case ast::TypeOperator::ARRAY:
-            return Array{type->other_types.at(0).get()};
+        case ast::TypeOperator::TUPLE: {
+            Tuple ret_val{this};
+            for (const auto& subtype : type->other_types) {
+                ret_val.values.push_back(constructValue(subtype.get()));
+                ret_val.types.push_back(subtype.get());
+            }
+
+            return ret_val;
+        } case ast::TypeOperator::ARRAY:
+            return Array{type->other_types.at(0).get(), this};
     }
 
     return Value{};
 }
 
 Reference Interpreter::makeReference(const ast::Identifier& id) {
-    return Reference{&findValue(id)};
+    return Reference{findVariable(id)->type.get(), &findValue(id)};
 }
 
 Value Interpreter::visitFile(ast::File *file) {
@@ -291,7 +309,7 @@ Value Interpreter::visitVariableDeclaration(ast::VariableDeclaration *var_decl) 
     }
 
     if (auto assignment = var_decl->assignment.get()) {
-        values.at(var_decl->variable) = visit(assignment);
+        values.at(var_decl->variable) = convert(visit(assignment), var->type.get());
     }
 
     return values.at(var_decl->variable);
@@ -319,8 +337,9 @@ Value Interpreter::visitComplexAssignment(ast::ComplexAssignment *assignment) {
 }
 
 Value Interpreter::visitSimpleAssignment(ast::SimpleAssignment *assignment) {
-    auto& var = getReferenceValue(visit(assignment->reference.get()));
-    var = removeReference(visit(assignment->expression.get()));
+    auto ref = visit(assignment->reference.get());
+    auto& var = getReferenceValue(ref);
+    var = convert(visit(assignment->expression.get()), util::get<Reference>(ref).type);
     return var;
 }
 
@@ -390,7 +409,7 @@ Value Interpreter::visitFunctionCall(ast::FunctionCall* call) {
                 util::string_hash{static_cast<std::string>(cur.name) + std::to_string(call_stack_size + 1)},
                 std::make_unique<ast::TypeIdentifier>(cur.type->clone())
             )),
-            removeReference(visit(call->arguments.at(i).get()))
+            convert(visit(call->arguments.at(i).get()), func->parameters.at(i).type.get())
         );
     }
     call_stack_size++;
@@ -435,11 +454,56 @@ Value Interpreter::visitObjectExpression(ast::ObjectExpression *object) {
 }
 
 Value Interpreter::visitArrayExpression(ast::ArrayExpression *array) {
-    Array ret_val;
+    Tuple ret_val{this};
 
     for (const auto& member : array->members) {
         ret_val.values.push_back(visit(member.get()));
     }
 
     return ret_val;
+}
+
+Value Interpreter::convert(const Value& other, const ast::TypeIdentifier *type) const {
+    Value ret_val = constructValue(type);
+
+    if (std::holds_alternative<Reference>(ret_val.getVariant())) {
+        ret_val = other;
+    } else if (std::holds_alternative<Array>(ret_val.getVariant()) && std::holds_alternative<Tuple>(other.getVariant())) {
+        Array ret_array{nullptr, this};
+        for (const auto& value : util::get<Tuple>(other).values) {
+            ret_array.values.emplace_back(value);
+        }
+        ret_val = ret_array;
+    //} else if (!std::holds_alternative<Reference>(ret_val.getVariant()) && std::holds_alternative<Reference>(other.getVariant())) {
+    //    ret_val = removeReference(other);
+    } else {
+        ret_val = removeReference(other);
+    }
+    return ret_val;
+}
+
+Array &Array::operator=(const Array &other) { // Have to reimplement Interpreter::convert bc of pesky constructValue
+    if (&other == this) return *this;
+    values.clear();
+
+    for (const auto& value : other.values) {
+        values.emplace_back(other.interpreter->convert(value, type));
+    }
+
+    interpreter = other.interpreter;
+    return *this;
+}
+
+Tuple &Tuple::operator=(const Tuple &other) {
+    if (&other == this) return *this;
+    if (values.size() != other.values.size()) {
+        throw BadTypeConversion{"Tuple sizes not equal"};
+    }
+
+    for (size_t i = 0; i < values.size(); i++) { // First standard for loop in forever
+        values.at(i) = other.interpreter->convert(other.values.at(i), types.at(i));
+    }
+
+    interpreter = other.interpreter;
+    return *this;
 }
