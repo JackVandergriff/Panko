@@ -68,6 +68,9 @@ public:
   virtual void enterFloat_lit(PankoParser::Float_litContext *ctx) = 0;
   virtual void exitFloat_lit(PankoParser::Float_litContext *ctx) = 0;
 
+  virtual void enterNull_lit(PankoParser::Null_litContext *ctx) = 0;
+  virtual void exitNull_lit(PankoParser::Null_litContext *ctx) = 0;
+
   virtual void enterBuiltin_type(PankoParser::Builtin_typeContext *ctx) = 0;
   virtual void exitBuiltin_type(PankoParser::Builtin_typeContext *ctx) = 0;
 

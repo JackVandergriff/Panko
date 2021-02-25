@@ -348,3 +348,7 @@ antlrcpp::Any ASTBuilder::visitArray_expr(PankoParser::Array_exprContext *contex
 
     return static_cast<ast::Node*>(expr);
 }
+
+antlrcpp::Any ASTBuilder::visitNull_lit(PankoParser::Null_litContext *) {
+    return static_cast<ast::Node*>(new ast::NullLiteral());
+}

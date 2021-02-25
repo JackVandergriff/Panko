@@ -41,7 +41,8 @@ line l1 = {
 get_vector(l1);
 
 false;
-[int...] wowzers = [1, 2, 3 + l1.p2.x];
-[point...] points = [l1.p1, l1.p2, {x : 3, y: 4}];
+int... wowzers = [1, 2, 3 + l1.p2.x];
+point... points = [l1.p1, l1.p2, {x : 3, y: 4}];
 
-[bool, point] tupleboi = [false, l1.p2];
+[bool, point*, int...] tupleboi = [false, l1.p2, [1, 2, 3]];
+[bool, point*, int...]* tupleboi2 = tupleboi;

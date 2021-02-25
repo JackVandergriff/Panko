@@ -112,6 +112,7 @@ namespace panko::runtime {
         Value visitIntegerLiteral(ast::IntegerLiteral *literal) override;
         Value visitFloatLiteral(ast::FloatLiteral *literal) override;
         Value visitBoolLiteral(ast::BoolLiteral* literal) override;
+        Value visitNullLiteral(ast::NullLiteral *literal) override;
         Value visitVariableDeclaration(ast::VariableDeclaration *var_decl) override;
         Value visitVariableExpression(ast::VariableExpression *identifier) override;
         Value visitComplexAssignment(ast::ComplexAssignment *assignment) override;

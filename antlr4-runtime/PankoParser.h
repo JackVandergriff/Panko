@@ -359,6 +359,17 @@ public:
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
+  class  Null_litContext : public ExpressionContext {
+  public:
+    Null_litContext(ExpressionContext *ctx);
+
+    antlr4::tree::TerminalNode *KW_NULL();
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   ExpressionContext* expression();
   ExpressionContext* expression(int precedence);
   class  TypeContext : public antlr4::ParserRuleContext {
@@ -391,8 +402,8 @@ public:
   public:
     Unary_typeContext(TypeContext *ctx);
 
-    Type_unary_operatorContext *type_unary_operator();
     TypeContext *type();
+    Type_unary_operatorContext *type_unary_operator();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 
@@ -414,10 +425,8 @@ public:
   public:
     Array_typeContext(TypeContext *ctx);
 
-    antlr4::tree::TerminalNode *OBRACKET();
     TypeContext *type();
     antlr4::tree::TerminalNode *ELIPSIS();
-    antlr4::tree::TerminalNode *CBRACKET();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 

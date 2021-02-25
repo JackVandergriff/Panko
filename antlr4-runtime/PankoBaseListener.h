@@ -70,6 +70,9 @@ public:
   virtual void enterFloat_lit(PankoParser::Float_litContext * /*ctx*/) override { }
   virtual void exitFloat_lit(PankoParser::Float_litContext * /*ctx*/) override { }
 
+  virtual void enterNull_lit(PankoParser::Null_litContext * /*ctx*/) override { }
+  virtual void exitNull_lit(PankoParser::Null_litContext * /*ctx*/) override { }
+
   virtual void enterBuiltin_type(PankoParser::Builtin_typeContext * /*ctx*/) override { }
   virtual void exitBuiltin_type(PankoParser::Builtin_typeContext * /*ctx*/) override { }
 

@@ -135,6 +135,8 @@ namespace panko::ast {
         bool value{};
     };
 
+    struct NullLiteral : Expression {};
+
     struct FunctionCall : Expression {
         Identifier function;
         std::vector<std::unique_ptr<Expression>> arguments;

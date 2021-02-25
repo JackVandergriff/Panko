@@ -78,7 +78,7 @@ void Interpreter::run() {
 
 const Value& Interpreter::removeReference(const Value& value) {
     if (std::holds_alternative<Reference>(value.getVariant())) {
-        return *std::get<Reference>(value.getVariant()).value;
+        return removeReference(*std::get<Reference>(value.getVariant()).value);
     } else {
         return value;
     }
@@ -159,7 +159,7 @@ Value Interpreter::constructValue(const ast::TypeIdentifier* type) const {
         case ast::TypeOperator::SUPERSET:
             break;
         case ast::TypeOperator::REFERENCE:
-            break;
+            return Reference{type->other_types.at(0).get(), nullptr};
         case ast::TypeOperator::CONJUNCTION:
             break;
         case ast::TypeOperator::DISJUNCTION:
@@ -466,6 +466,8 @@ Value Interpreter::visitArrayExpression(ast::ArrayExpression *array) {
 Value Interpreter::convert(const Value& other, const ast::TypeIdentifier *type) const {
     Value ret_val = constructValue(type);
 
+    if (ret_val.getIndex() == other.getIndex()) return other;
+
     if (std::holds_alternative<Reference>(ret_val.getVariant())) {
         ret_val = other;
     } else if (std::holds_alternative<Array>(ret_val.getVariant()) && std::holds_alternative<Tuple>(other.getVariant())) {
@@ -480,6 +482,10 @@ Value Interpreter::convert(const Value& other, const ast::TypeIdentifier *type) 
         ret_val = removeReference(other);
     }
     return ret_val;
+}
+
+Value Interpreter::visitNullLiteral(ast::NullLiteral*) {
+    return Null{};
 }
 
 Array &Array::operator=(const Array &other) { // Have to reimplement Interpreter::convert bc of pesky constructValue

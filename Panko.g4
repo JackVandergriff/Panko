@@ -29,13 +29,14 @@ expression : OPAREN expression CPAREN #paren_expr
  | IDENTIFIER #id_expr
  | INTLIT #int_lit
  | FLOATLIT #float_lit
- | (TRUE | FALSE) #bool_lit;
+ | (TRUE | FALSE) #bool_lit
+ | KW_NULL #null_lit;
 
 type : OPAREN type CPAREN #paren_type
- | type_unary_operator type #unary_type
+ | type type_unary_operator #unary_type
  | lhs=type type_binary_operator rhs=type #binary_type
  | OBRACKET type (COMMA type)* CBRACKET #tuple_type
- | OBRACKET type ELIPSIS CBRACKET #array_type
+ | type ELIPSIS #array_type
  | (INT | FLOAT | KW_NULL) #builtin_type
  | IDENTIFIER #id_type;
 

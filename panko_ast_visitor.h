@@ -21,6 +21,7 @@ namespace panko::ast {
         virtual T visitIntegerLiteral(IntegerLiteral*)=0;
         virtual T visitFloatLiteral(FloatLiteral*)=0;
         virtual T visitBoolLiteral(BoolLiteral*)=0;
+        virtual T visitNullLiteral(NullLiteral*)=0;
         virtual T visitFunctionCall(FunctionCall*)=0;
         virtual T visitBinaryOperatorExpression(BinaryOperatorExpression*)=0;
         virtual T visitUnaryOperatorExpression(UnaryOperatorExpression*)=0;
@@ -40,17 +41,19 @@ namespace panko::ast {
         T visit(Node* node) { // Will dispatch to most specified type
             if (auto statement = dynamic_cast<Statement*>(node)) {
                 if (auto expression = dynamic_cast<Expression*>(statement)) {
-                    if (auto int_lit = dynamic_cast<IntegerLiteral *>(expression)) {
+                    if (auto int_lit = dynamic_cast<IntegerLiteral*>(expression)) {
                         return visitIntegerLiteral(int_lit);
-                    } else if (auto float_lit = dynamic_cast<FloatLiteral *>(expression)) {
+                    } else if (auto float_lit = dynamic_cast<FloatLiteral*>(expression)) {
                         return visitFloatLiteral(float_lit);
-                    } else if (auto bool_lit = dynamic_cast<BoolLiteral *>(expression)) {
+                    } else if (auto bool_lit = dynamic_cast<BoolLiteral*>(expression)) {
                         return visitBoolLiteral(bool_lit);
-                    } else if (auto func_call = dynamic_cast<FunctionCall *>(expression)) {
+                    } else if (auto null_lit = dynamic_cast<NullLiteral*>(expression)) {
+                        return visitNullLiteral(null_lit);
+                    } else if (auto func_call = dynamic_cast<FunctionCall*>(expression)) {
                         return visitFunctionCall(func_call);
-                    } else if (auto binop_expr = dynamic_cast<BinaryOperatorExpression *>(expression)) {
+                    } else if (auto binop_expr = dynamic_cast<BinaryOperatorExpression*>(expression)) {
                         return visitBinaryOperatorExpression(binop_expr);
-                    } else if (auto unary_expr = dynamic_cast<UnaryOperatorExpression *>(expression)) {
+                    } else if (auto unary_expr = dynamic_cast<UnaryOperatorExpression*>(expression)) {
                         return visitUnaryOperatorExpression(unary_expr);
                     } else if (auto var_expr = dynamic_cast<VariableExpression*>(expression)) {
                         return visitVariableExpression(var_expr);
@@ -101,6 +104,7 @@ namespace panko::ast {
         T visitIntegerLiteral(IntegerLiteral*) override { return T(); }
         T visitFloatLiteral(FloatLiteral*) override { return T(); }
         T visitBoolLiteral(BoolLiteral*) override { return T(); }
+        T visitNullLiteral(NullLiteral*) override { return T(); }
         T visitFunctionCall(FunctionCall*) override { return T(); }
         T visitBinaryOperatorExpression(BinaryOperatorExpression*) override { return T(); }
         T visitUnaryOperatorExpression(UnaryOperatorExpression*) override { return T(); }

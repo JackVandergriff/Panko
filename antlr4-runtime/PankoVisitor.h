@@ -55,6 +55,8 @@ public:
 
     virtual antlrcpp::Any visitFloat_lit(PankoParser::Float_litContext *context) = 0;
 
+    virtual antlrcpp::Any visitNull_lit(PankoParser::Null_litContext *context) = 0;
+
     virtual antlrcpp::Any visitBuiltin_type(PankoParser::Builtin_typeContext *context) = 0;
 
     virtual antlrcpp::Any visitUnary_type(PankoParser::Unary_typeContext *context) = 0;
