@@ -352,3 +352,10 @@ antlrcpp::Any ASTBuilder::visitArray_expr(PankoParser::Array_exprContext *contex
 antlrcpp::Any ASTBuilder::visitNull_lit(PankoParser::Null_litContext *) {
     return static_cast<ast::Node*>(new ast::NullLiteral());
 }
+
+antlrcpp::Any ASTBuilder::visitArray_access_expr(PankoParser::Array_access_exprContext *context) {
+    auto expr = new ast::ArrayAccessExpression();
+    expr->reference = make_unique_any<ast::Expression>(context->expression()->accept(this));
+    expr->index = std::stoi(context->INTLIT()->getText());
+    return static_cast<ast::Node*>(expr);
+}

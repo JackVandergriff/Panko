@@ -29,7 +29,7 @@ ComplexValue &ComplexValue::operator=(ComplexValue&& other) {
 std::ostream& panko::runtime::operator<<(std::ostream& os, const Value& val) {
     static int tab_depth = 0;
 
-    util::visit(val.getVariant(),
+    util::visit(val,
         [&os](const ComplexValue& val) {
             os << "Object: {";
             tab_depth++;
@@ -86,7 +86,11 @@ const Value& Interpreter::removeReference(const Value& value) {
 
 Value& Interpreter::getReferenceValue(const Value& ref) {
     try {
-        return *util::get<Reference>(ref).value;
+        Value& ret_val = *util::get<Reference>(ref).value;
+        while (true) {
+            if (!std::holds_alternative<Reference>(ret_val.getVariant())) return ret_val;
+            ret_val = *util::get<Reference>(ret_val).value;
+        }
     } catch (std::bad_variant_access&) {
         throw BadTypeConversion{"Value is not a reference"};
     }
@@ -262,7 +266,7 @@ Value Interpreter::visitBinaryOperatorExpression(ast::BinaryOperatorExpression *
 }
 
 Value Interpreter::visitUnaryOperatorExpression(ast::UnaryOperatorExpression* expression) {
-    return util::visit(removeReference(visit(expression->lhs.get())).getVariant(),
+    return util::visit(removeReference(visit(expression->lhs.get())),
         [expression](int lhs){
             switch (expression->op) {
                 case ast::UnaryOperator::BITNOT:
@@ -322,7 +326,7 @@ Value Interpreter::visitVariableExpression(ast::VariableExpression *identifier) 
 Value Interpreter::visitComplexAssignment(ast::ComplexAssignment *assignment) {
     auto& var = getReferenceValue(visit(assignment->reference.get()));
     var = util::visit(
-        var.getVariant(),
+        var,
         [assignment](util::Number auto value){
             if (assignment->increment) {
                 return Value{value + 1};
@@ -476,8 +480,6 @@ Value Interpreter::convert(const Value& other, const ast::TypeIdentifier *type) 
             ret_array.values.emplace_back(value);
         }
         ret_val = ret_array;
-    //} else if (!std::holds_alternative<Reference>(ret_val.getVariant()) && std::holds_alternative<Reference>(other.getVariant())) {
-    //    ret_val = removeReference(other);
     } else {
         ret_val = removeReference(other);
     }
@@ -486,6 +488,14 @@ Value Interpreter::convert(const Value& other, const ast::TypeIdentifier *type) 
 
 Value Interpreter::visitNullLiteral(ast::NullLiteral*) {
     return Null{};
+}
+
+Value Interpreter::visitArrayAccessExpression(ast::ArrayAccessExpression *access) {
+    return util::visit(getReferenceValue(visit(access->reference.get())),
+        [access](Array& array){ return Reference{array.type, &array.values.at(access->index)}; },
+        [access](Tuple& tuple){ return Reference{tuple.types.at(access->index), &tuple.values.at(access->index)}; },
+        [](auto& other){ std::cout << other << '\n'; throw BadOperatorCall{"Can't use non-array type as array"}; return Reference{};}
+    );
 }
 
 Array &Array::operator=(const Array &other) { // Have to reimplement Interpreter::convert bc of pesky constructValue

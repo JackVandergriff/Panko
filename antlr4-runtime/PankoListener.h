@@ -23,11 +23,11 @@ public:
   virtual void enterFunc_decl(PankoParser::Func_declContext *ctx) = 0;
   virtual void exitFunc_decl(PankoParser::Func_declContext *ctx) = 0;
 
-  virtual void enterSemi_statement(PankoParser::Semi_statementContext *ctx) = 0;
-  virtual void exitSemi_statement(PankoParser::Semi_statementContext *ctx) = 0;
-
   virtual void enterBlock_statement(PankoParser::Block_statementContext *ctx) = 0;
   virtual void exitBlock_statement(PankoParser::Block_statementContext *ctx) = 0;
+
+  virtual void enterSemi_statement(PankoParser::Semi_statementContext *ctx) = 0;
+  virtual void exitSemi_statement(PankoParser::Semi_statementContext *ctx) = 0;
 
   virtual void enterParen_expr(PankoParser::Paren_exprContext *ctx) = 0;
   virtual void exitParen_expr(PankoParser::Paren_exprContext *ctx) = 0;
@@ -61,6 +61,9 @@ public:
 
   virtual void enterUnary_expr(PankoParser::Unary_exprContext *ctx) = 0;
   virtual void exitUnary_expr(PankoParser::Unary_exprContext *ctx) = 0;
+
+  virtual void enterArray_access_expr(PankoParser::Array_access_exprContext *ctx) = 0;
+  virtual void exitArray_access_expr(PankoParser::Array_access_exprContext *ctx) = 0;
 
   virtual void enterInt_lit(PankoParser::Int_litContext *ctx) = 0;
   virtual void exitInt_lit(PankoParser::Int_litContext *ctx) = 0;

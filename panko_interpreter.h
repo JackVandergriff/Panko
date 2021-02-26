@@ -125,6 +125,7 @@ namespace panko::runtime {
         Value visitFunctionCall(ast::FunctionCall* call) override;
         Value visitTypeDeclaration(ast::TypeDeclaration*) override;
         Value visitAccessExpression(ast::AccessExpression* access) override;
+        Value visitArrayAccessExpression(ast::ArrayAccessExpression* access) override;
         Value visitObjectExpression(ast::ObjectExpression* object) override;
         Value visitArrayExpression(ast::ArrayExpression* array) override;
     };

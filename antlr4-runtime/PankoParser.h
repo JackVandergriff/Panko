@@ -142,10 +142,10 @@ public:
   public:
     Semi_statementContext(StatementContext *ctx);
 
-    ExpressionContext *expression();
-    antlr4::tree::TerminalNode *SEMICLN();
     Var_declContext *var_decl();
+    antlr4::tree::TerminalNode *SEMICLN();
     Return_statementContext *return_statement();
+    ExpressionContext *expression();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 
@@ -331,6 +331,20 @@ public:
 
     Unary_operatorContext *unary_operator();
     ExpressionContext *expression();
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  Array_access_exprContext : public ExpressionContext {
+  public:
+    Array_access_exprContext(ExpressionContext *ctx);
+
+    ExpressionContext *expression();
+    antlr4::tree::TerminalNode *OBRACKET();
+    antlr4::tree::TerminalNode *INTLIT();
+    antlr4::tree::TerminalNode *CBRACKET();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 

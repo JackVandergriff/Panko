@@ -8,14 +8,14 @@ block : OBRACE (statement)* CBRACE;
 
 func_decl: ret_type=typed_identifier OPAREN (params+=typed_identifier (COMMA params+=typed_identifier)*)? CPAREN block;
 
-statement : expression SEMICLN #semi_statement
- | func_decl #block_statement
+statement : func_decl #block_statement
  | var_decl SEMICLN #semi_statement
  | type_decl #block_statement
  | if_statement #block_statement
  | while_loop #block_statement
  | block #block_statement
- | return_statement SEMICLN #semi_statement;
+ | return_statement SEMICLN #semi_statement
+ | expression SEMICLN #semi_statement;
 
 expression : OPAREN expression CPAREN #paren_expr
  | lhs=expression binary_operator rhs=expression #binary_expr
@@ -24,6 +24,7 @@ expression : OPAREN expression CPAREN #paren_expr
  | lhs=expression assignment_operator rhs=expression #simple_assignment
  | expression op=(INC | DEC) #complex_assignment
  | initial=IDENTIFIER (PERIOD accessors+=IDENTIFIER)+ #access_expr
+ | expression OBRACKET INTLIT CBRACKET #array_access_expr
  | OBRACE (object_var COMMA)* object_var CBRACE #obj_expr
  | OBRACKET (expression COMMA)* expression CBRACKET #array_expr
  | IDENTIFIER #id_expr

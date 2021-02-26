@@ -209,6 +209,11 @@ namespace panko::ast {
         std::vector<std::string> accessors;
     };
 
+    struct ArrayAccessExpression : Expression {
+        std::unique_ptr<Expression> reference;
+        int index;
+    };
+
     struct ObjectExpression : Expression {
         std::vector<std::pair<util::string_hash, std::unique_ptr<Expression>>> members;
     };

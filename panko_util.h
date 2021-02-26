@@ -83,11 +83,6 @@ namespace panko::util {
     template<typename T>
     concept Number = std::is_arithmetic_v<T>;
 
-    template<typename Variant, typename... Args>
-    auto visit(Variant&& variant, Args&&... lambdas) {
-        return std::visit(visitor{lambdas...}, variant);
-    }
-
     class Exception : public std::exception {
     private:
         const std::string message;
@@ -178,7 +173,24 @@ namespace panko::util {
 
         template<typename>
         friend decltype(auto) get(auto&&);
+
+        template<typename T, typename... Args>
+        friend decltype(auto) visit(T&&, Args&&...);
     };
+
+    template <typename T>
+    concept IsInvariant = requires (std::remove_cvref_t<T> v) {
+        {v.getVariant()} -> std::convertible_to<std::remove_cvref_t<decltype(v.variant)>>;
+    };
+
+    template<typename Variant, typename... Args>
+    decltype(auto) visit(Variant&& variant, Args&&... lambdas) {
+        if constexpr (IsInvariant<Variant>) {
+            return std::visit(visitor{std::forward<Args>(lambdas)...}, variant.variant);
+        } else {
+            return std::visit(visitor{std::forward<Args>(lambdas)...}, std::forward<Variant>(variant));
+        }
+    }
 
     template<typename T>
     decltype(auto) get(auto&& invariant) {

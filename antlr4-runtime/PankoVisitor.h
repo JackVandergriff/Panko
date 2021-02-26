@@ -25,9 +25,9 @@ public:
 
     virtual antlrcpp::Any visitFunc_decl(PankoParser::Func_declContext *context) = 0;
 
-    virtual antlrcpp::Any visitSemi_statement(PankoParser::Semi_statementContext *context) = 0;
-
     virtual antlrcpp::Any visitBlock_statement(PankoParser::Block_statementContext *context) = 0;
+
+    virtual antlrcpp::Any visitSemi_statement(PankoParser::Semi_statementContext *context) = 0;
 
     virtual antlrcpp::Any visitParen_expr(PankoParser::Paren_exprContext *context) = 0;
 
@@ -50,6 +50,8 @@ public:
     virtual antlrcpp::Any visitArray_expr(PankoParser::Array_exprContext *context) = 0;
 
     virtual antlrcpp::Any visitUnary_expr(PankoParser::Unary_exprContext *context) = 0;
+
+    virtual antlrcpp::Any visitArray_access_expr(PankoParser::Array_access_exprContext *context) = 0;
 
     virtual antlrcpp::Any visitInt_lit(PankoParser::Int_litContext *context) = 0;
 

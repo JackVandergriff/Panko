@@ -35,6 +35,7 @@ namespace panko::ast {
         virtual T visitFunctionDeclaration(FunctionDeclaration*)=0;
         virtual T visitTypeDeclaration(TypeDeclaration*)=0;
         virtual T visitAccessExpression(AccessExpression*)=0;
+        virtual T visitArrayAccessExpression(ArrayAccessExpression*)=0;
         virtual T visitObjectExpression(ObjectExpression*)=0;
         virtual T visitArrayExpression(ArrayExpression*)=0;
 
@@ -63,6 +64,8 @@ namespace panko::ast {
                         return visitSimpleAssignment(assignment);
                     } else if (auto access = dynamic_cast<AccessExpression*>(expression)) {
                         return visitAccessExpression(access);
+                    } else if (auto array_access = dynamic_cast<ArrayAccessExpression*>(expression)) {
+                        return visitArrayAccessExpression(array_access);
                     } else if (auto obj = dynamic_cast<ObjectExpression*>(expression)) {
                         return visitObjectExpression(obj);
                     } else if (auto arr = dynamic_cast<ArrayExpression*>(expression)) {
@@ -116,6 +119,7 @@ namespace panko::ast {
         T visitFunctionDeclaration(FunctionDeclaration*) override { return T(); }
         T visitTypeDeclaration(TypeDeclaration*) override { return T(); }
         T visitAccessExpression(AccessExpression*) override { return T(); }
+        T visitArrayAccessExpression(ArrayAccessExpression*) override { return T(); }
         T visitObjectExpression(ObjectExpression*) override { return T(); }
         T visitArrayExpression(ArrayExpression*) override { return T(); }
     };

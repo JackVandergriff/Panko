@@ -25,11 +25,11 @@ public:
   virtual void enterFunc_decl(PankoParser::Func_declContext * /*ctx*/) override { }
   virtual void exitFunc_decl(PankoParser::Func_declContext * /*ctx*/) override { }
 
-  virtual void enterSemi_statement(PankoParser::Semi_statementContext * /*ctx*/) override { }
-  virtual void exitSemi_statement(PankoParser::Semi_statementContext * /*ctx*/) override { }
-
   virtual void enterBlock_statement(PankoParser::Block_statementContext * /*ctx*/) override { }
   virtual void exitBlock_statement(PankoParser::Block_statementContext * /*ctx*/) override { }
+
+  virtual void enterSemi_statement(PankoParser::Semi_statementContext * /*ctx*/) override { }
+  virtual void exitSemi_statement(PankoParser::Semi_statementContext * /*ctx*/) override { }
 
   virtual void enterParen_expr(PankoParser::Paren_exprContext * /*ctx*/) override { }
   virtual void exitParen_expr(PankoParser::Paren_exprContext * /*ctx*/) override { }
@@ -63,6 +63,9 @@ public:
 
   virtual void enterUnary_expr(PankoParser::Unary_exprContext * /*ctx*/) override { }
   virtual void exitUnary_expr(PankoParser::Unary_exprContext * /*ctx*/) override { }
+
+  virtual void enterArray_access_expr(PankoParser::Array_access_exprContext * /*ctx*/) override { }
+  virtual void exitArray_access_expr(PankoParser::Array_access_exprContext * /*ctx*/) override { }
 
   virtual void enterInt_lit(PankoParser::Int_litContext * /*ctx*/) override { }
   virtual void exitInt_lit(PankoParser::Int_litContext * /*ctx*/) override { }

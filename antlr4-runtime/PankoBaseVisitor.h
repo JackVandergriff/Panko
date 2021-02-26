@@ -27,11 +27,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitSemi_statement(PankoParser::Semi_statementContext *ctx) override {
+  virtual antlrcpp::Any visitBlock_statement(PankoParser::Block_statementContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitBlock_statement(PankoParser::Block_statementContext *ctx) override {
+  virtual antlrcpp::Any visitSemi_statement(PankoParser::Semi_statementContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -76,6 +76,10 @@ public:
   }
 
   virtual antlrcpp::Any visitUnary_expr(PankoParser::Unary_exprContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitArray_access_expr(PankoParser::Array_access_exprContext *ctx) override {
     return visitChildren(ctx);
   }
 
