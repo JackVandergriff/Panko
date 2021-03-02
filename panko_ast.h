@@ -205,7 +205,7 @@ namespace panko::ast {
     };
 
     struct AccessExpression : Expression {
-        Identifier initial;
+        std::unique_ptr<Expression> reference;
         std::vector<std::string> accessors;
     };
 

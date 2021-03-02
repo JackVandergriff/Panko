@@ -234,7 +234,7 @@ antlrcpp::Any ASTBuilder::visitType_decl(PankoParser::Type_declContext *context)
 antlrcpp::Any ASTBuilder::visitAccess_expr(PankoParser::Access_exprContext *context) {
     auto access = new ast::AccessExpression();
 
-    access->initial = {context->initial->getText(), std::ref(ast_context)};
+    access->reference = make_unique_any<ast::Expression>(context->expression()->accept(this));
     for (const auto& accessor : context->accessors) {
         access->accessors.emplace_back(accessor->getText());
     }

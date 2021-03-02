@@ -199,13 +199,13 @@ public:
   public:
     Access_exprContext(ExpressionContext *ctx);
 
-    antlr4::Token *initial = nullptr;
     antlr4::Token *identifierToken = nullptr;
     std::vector<antlr4::Token *> accessors;
-    std::vector<antlr4::tree::TerminalNode *> IDENTIFIER();
-    antlr4::tree::TerminalNode* IDENTIFIER(size_t i);
+    ExpressionContext *expression();
     std::vector<antlr4::tree::TerminalNode *> PERIOD();
     antlr4::tree::TerminalNode* PERIOD(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> IDENTIFIER();
+    antlr4::tree::TerminalNode* IDENTIFIER(size_t i);
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 

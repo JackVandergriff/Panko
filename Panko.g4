@@ -18,13 +18,13 @@ statement : func_decl #block_statement
  | expression SEMICLN #semi_statement;
 
 expression : OPAREN expression CPAREN #paren_expr
+ | expression (PERIOD accessors+=IDENTIFIER)+ #access_expr
+ | expression OBRACKET INTLIT CBRACKET #array_access_expr
  | lhs=expression binary_operator rhs=expression #binary_expr
  | unary_operator expression #unary_expr
  | IDENTIFIER OPAREN argument_list? CPAREN #func_expr
  | lhs=expression assignment_operator rhs=expression #simple_assignment
  | expression op=(INC | DEC) #complex_assignment
- | initial=IDENTIFIER (PERIOD accessors+=IDENTIFIER)+ #access_expr
- | expression OBRACKET INTLIT CBRACKET #array_access_expr
  | OBRACE (object_var COMMA)* object_var CBRACE #obj_expr
  | OBRACKET (expression COMMA)* expression CBRACKET #array_expr
  | IDENTIFIER #id_expr

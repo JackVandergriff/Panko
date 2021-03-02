@@ -42,7 +42,7 @@ std::ostream& panko::runtime::operator<<(std::ostream& os, const Value& val) {
         [&os](int val){ os << "Int: " << val; },
         [&os](double val){ os << "Double: " << val; },
         [&os](bool val){ os << "Bool: " << val; },
-        [&os](Reference val){ os << "Reference to " << *val.value; },
+        [&os](Reference val){ os << "Reference to " << *val.getValue(); },
         [&os](const auto& array) {
             tab_depth++;
             if constexpr (std::is_same_v<std::remove_cvref_t<decltype(array)>, Array>) {
@@ -78,7 +78,7 @@ void Interpreter::run() {
 
 const Value& Interpreter::removeReference(const Value& value) {
     if (std::holds_alternative<Reference>(value.getVariant())) {
-        return removeReference(*std::get<Reference>(value.getVariant()).value);
+        return removeReference(*std::get<Reference>(value.getVariant()).getValue());
     } else {
         return value;
     }
@@ -86,11 +86,7 @@ const Value& Interpreter::removeReference(const Value& value) {
 
 Value& Interpreter::getReferenceValue(const Value& ref) {
     try {
-        Value& ret_val = *util::get<Reference>(ref).value;
-        while (true) {
-            if (!std::holds_alternative<Reference>(ret_val.getVariant())) return ret_val;
-            ret_val = *util::get<Reference>(ret_val).value;
-        }
+        return *util::get<Reference>(ref).getValue();
     } catch (std::bad_variant_access&) {
         throw BadTypeConversion{"Value is not a reference"};
     }
@@ -142,6 +138,7 @@ const ast::Function* Interpreter::findFunction(const ast::Identifier& id) const 
 }
 
 Value Interpreter::constructValue(const ast::TypeIdentifier* type) const {
+    if (!type) return Value{};
     switch (type->op) {
         case ast::TypeOperator::BASIC: { // Need block to be able to initialize new variables (dumb)
             const auto actual = findType(type->id);
@@ -435,13 +432,11 @@ Value Interpreter::visitTypeDeclaration(ast::TypeDeclaration*) {
 }
 
 Value Interpreter::visitAccessExpression(ast::AccessExpression* access) {
-    auto [hash, var_ptr] = findVariableAndHash(access->initial);
-    Reference ret_val = makeReference(access->initial);
+    Reference ret_val = util::get<Reference>(visit(access->reference.get()));
+    ret_val.type = nullptr; // I don't like it either
 
-    if (var_ptr) {
-        for (const auto& accessor : access->accessors) {
-            ret_val.value = &util::get<ComplexValue>(*ret_val.value).attributes.at(accessor);
-        }
+    for (const auto& accessor : access->accessors) {
+        ret_val.setValue(&util::get<ComplexValue>(*ret_val.getValue()).attributes.at(accessor));
     }
 
     return ret_val;
@@ -522,4 +517,21 @@ Tuple &Tuple::operator=(const Tuple &other) {
 
     interpreter = other.interpreter;
     return *this;
+}
+
+void Reference::setValue(Value* val) {
+    if (val && std::holds_alternative<Reference>(val->getVariant())) {
+        value = util::get<Reference>(*val).value;
+        type = util::get<Reference>(*val).type;
+    } else {
+        value = val;
+    }
+}
+
+Value* Reference::getValue() const {
+    return value;
+}
+
+Reference::Reference(const ast::TypeIdentifier *type, Value *value) : type{type} {
+    setValue(value);
 }

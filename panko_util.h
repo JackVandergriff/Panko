@@ -133,14 +133,14 @@ namespace panko::util {
         constexpr invariant& operator=(const invariant& other) {
             if (initialized) {
                 std::visit(
-                        [](auto &current, const auto &other) {
-                            if constexpr (std::is_same_v<std::remove_cvref_t<decltype(other)>, std::remove_cvref_t<decltype(current)>>) {
-                                current = other;
-                            } else {
-                                throw InvariantAccessException("Invariant types not equivalent");
-                            }
-                        },
-                        variant, other.variant);
+                    [](auto &current, const auto &other) {
+                        if constexpr (std::is_same_v<std::remove_cvref_t<decltype(other)>, std::remove_cvref_t<decltype(current)>>) {
+                            current = other;
+                        } else {
+                            throw InvariantAccessException("Invariant types not equivalent");
+                        }
+                    }, variant, other.variant
+                );
             } else {
                 variant = other.variant;
                 initialized = true;

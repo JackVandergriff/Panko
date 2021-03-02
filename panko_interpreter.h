@@ -22,7 +22,7 @@ namespace panko::runtime {
 
     struct ComplexValue;
     struct ReturnValue;
-    struct Reference;
+    class Reference;
     struct Array;
     struct Tuple;
     struct Interpreter;
@@ -32,9 +32,17 @@ namespace panko::runtime {
     using Null = std::monostate;
     using Value = util::invariant<int, double, bool, Null, ComplexValue, Returning, Reference, Array, Tuple>;
 
-    struct Reference {
-        const ast::TypeIdentifier* type;
-        Value* value;
+    class Reference {
+    private:
+        Value* value = nullptr; // Need to check each time value assigned to avoid multi-level references
+    public:
+        const ast::TypeIdentifier* type = nullptr;
+
+        void setValue(Value* val);
+        [[nodiscard]] Value* getValue() const;
+
+        Reference()=default;
+        Reference(const ast::TypeIdentifier* type, Value* value);
     };
 
     struct ComplexValue {
