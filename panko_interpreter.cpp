@@ -42,7 +42,8 @@ std::ostream& panko::runtime::operator<<(std::ostream& os, const Value& val) {
         [&os](int val){ os << "Int: " << val; },
         [&os](double val){ os << "Double: " << val; },
         [&os](bool val){ os << "Bool: " << val; },
-        [&os](Reference val){ os << "Reference to " << *val.getValue(); },
+        [&os](const Reference& val){ os << "Reference to " << *val.getValue(); },
+        [&os](const Superset& val){ os << "Superset with value: " << val.getValue(); },
         [&os](const auto& array) {
             tab_depth++;
             if constexpr (std::is_same_v<std::remove_cvref_t<decltype(array)>, Array>) {
@@ -158,7 +159,7 @@ Value Interpreter::constructValue(const ast::TypeIdentifier* type) const {
         } case ast::TypeOperator::SUBSET:
             break;
         case ast::TypeOperator::SUPERSET:
-            break;
+            return Superset{util::get<ComplexValue>(constructValue(type->other_types.at(0).get()))};
         case ast::TypeOperator::REFERENCE:
             return Reference{type->other_types.at(0).get(), nullptr};
         case ast::TypeOperator::CONJUNCTION:
@@ -463,7 +464,14 @@ Value Interpreter::visitArrayExpression(ast::ArrayExpression *array) {
 }
 
 Value Interpreter::convert(const Value& other, const ast::TypeIdentifier *type) const {
-    Value ret_val = constructValue(type);
+    Value ret_val;
+    if (type && type->op == ast::TypeOperator::SUPERSET) {
+        return Superset{util::get<ComplexValue>(removeReference(other))};
+    } else if (type && type->op == ast::TypeOperator::SUBSET) {
+        return Value{};
+    } else {
+        ret_val = constructValue(type);
+    }
 
     if (ret_val.getIndex() == other.getIndex()) return other;
 
@@ -534,4 +542,30 @@ Value* Reference::getValue() const {
 
 Reference::Reference(const ast::TypeIdentifier *type, Value *value) : type{type} {
     setValue(value);
+}
+
+void Superset::setValue(const ComplexValue& new_value) {
+    if (!util::typeSubset(test_value.attributes, new_value.attributes)) {
+        throw BadTypeConversion{"New value doesn't contain all aspects of subtype"};
+    }
+
+    value.attributes = test_value.attributes;
+    for (const auto& kv : new_value.attributes) {
+        auto iter = value.attributes.find(kv.first);
+        if (iter == value.attributes.end()) {
+            value.attributes.emplace(kv);
+        } else {
+            value.attributes.at(kv.first) = kv.second;
+        }
+    }
+}
+
+const ComplexValue &Superset::getValue() const {
+    return value;
+}
+
+Superset &Superset::operator=(const Superset &other) {
+    if (&other == this) return *this;
+    setValue(other.value);
+    return *this;
 }

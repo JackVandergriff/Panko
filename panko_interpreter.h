@@ -8,6 +8,7 @@
 #include "panko_ast_visitor.h"
 
 #include <iostream>
+#include <utility>
 #include <variant>
 
 namespace panko::runtime {
@@ -26,11 +27,12 @@ namespace panko::runtime {
     struct Array;
     struct Tuple;
     struct Interpreter;
+    class Superset;
 
     struct Returning {};
 
     using Null = std::monostate;
-    using Value = util::invariant<int, double, bool, Null, ComplexValue, Returning, Reference, Array, Tuple>;
+    using Value = util::invariant<int, double, bool, Null, ComplexValue, Returning, Reference, Array, Tuple, Superset>;
 
     class Reference {
     private:
@@ -85,6 +87,21 @@ namespace panko::runtime {
         Tuple& operator=(const Tuple& other);
         Tuple(Tuple&&)=default;
         Tuple& operator=(Tuple&&)=default;
+    };
+
+    class Superset {
+    private:
+        ComplexValue value;
+        ComplexValue test_value;
+    public:
+        Superset()=default;
+        explicit Superset(ComplexValue test_value) : value{std::move(test_value)}, test_value{value} {};
+
+        void setValue(const ComplexValue& new_value);
+        [[nodiscard]] const ComplexValue& getValue() const;
+
+        Superset(const Superset&)=default;
+        Superset& operator=(const Superset& other);
     };
 
     using WeakValue = std::remove_cvref_t<decltype(Value{}.getVariant())>; // Get the variant inside Value

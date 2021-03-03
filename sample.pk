@@ -51,3 +51,5 @@ point* pp = tupleboi[1];
 tupleboi[2][0] = 42069;
 tupleboi[1].x = 12;
 tupleboi;
+
+point> superpoint = pp;
