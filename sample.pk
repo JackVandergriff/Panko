@@ -5,6 +5,10 @@ type point {
     int y;
 }
 
+type int_wrap {
+    int x;
+}
+
 type point_f {
     float x;
     float y;
@@ -52,4 +56,6 @@ tupleboi[2][0] = 42069;
 tupleboi[1].x = 12;
 tupleboi;
 
-point> superpoint = pp;
+int_wrap> superpoint = pp;
+superpoint;
+points[1] = {x: 100, y: 1000};

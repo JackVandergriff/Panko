@@ -118,7 +118,7 @@ namespace panko::runtime {
         explicit Interpreter(const ast::AST& ast) : ast{ast} {}
         void run();
 
-        static const Value& removeReference(const Value& value);
+        static const Value& decay(const Value& value);
         static Value& getReferenceValue(const Value& ref);
         Reference makeReference(const ast::Identifier& id);
 
@@ -154,6 +154,12 @@ namespace panko::runtime {
         Value visitObjectExpression(ast::ObjectExpression* object) override;
         Value visitArrayExpression(ast::ArrayExpression* array) override;
     };
+
+    template<typename T>
+    concept UnaryType = std::is_same_v<std::remove_cvref_t<T>, Reference> || std::is_same_v<std::remove_cvref_t<T>, Superset>;
+
+    template<typename T>
+    concept ContainerType = std::is_same_v<std::remove_cvref_t<T>, Array> || std::is_same_v<std::remove_cvref_t<T>, Tuple>;
 }
 
 #endif //PANKO_INTERPRETER_H

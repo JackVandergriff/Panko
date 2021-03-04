@@ -77,12 +77,12 @@ void Interpreter::run() {
     }
 }
 
-const Value& Interpreter::removeReference(const Value& value) {
-    if (std::holds_alternative<Reference>(value.getVariant())) {
-        return removeReference(*std::get<Reference>(value.getVariant()).getValue());
-    } else {
-        return value;
-    }
+const Value& Interpreter::decay(const Value& value) {
+    return *util::visit(value,
+        [](const Reference& ref){return &decay(*ref.getValue());},
+        [](const Superset& sup){return &decay(sup.getValue());},
+        [&](const auto&){return &value;}
+    );
 }
 
 Value& Interpreter::getReferenceValue(const Value& ref) {
@@ -226,7 +226,7 @@ Value Interpreter::visitBinaryOperatorExpression(ast::BinaryOperatorExpression *
     };
 
     return std::visit(
-        util::visitor{
+            util::visitor{
             [expression, int_float_lambda](int lhs, int rhs) {
                 switch (expression->op) {
                     case ast::BinaryOperator::MOD:
@@ -258,14 +258,14 @@ Value Interpreter::visitBinaryOperatorExpression(ast::BinaryOperatorExpression *
             int_float_lambda,
             [](auto&&, auto&&){throw BadOperatorCall{"Failed to find operator overload"}; return Value{};}
         },
-        removeReference(visit(expression->lhs.get())).getVariant(),
-        removeReference(visit(expression->rhs.get())).getVariant()
+            decay(visit(expression->lhs.get())).getVariant(),
+            decay(visit(expression->rhs.get())).getVariant()
     );
 }
 
 Value Interpreter::visitUnaryOperatorExpression(ast::UnaryOperatorExpression* expression) {
-    return util::visit(removeReference(visit(expression->lhs.get())),
-        [expression](int lhs){
+    return util::visit(decay(visit(expression->lhs.get())),
+                       [expression](int lhs){
             switch (expression->op) {
                 case ast::UnaryOperator::BITNOT:
                     return Value{~lhs};
@@ -273,7 +273,7 @@ Value Interpreter::visitUnaryOperatorExpression(ast::UnaryOperatorExpression* ex
                     return Value{!lhs};
             }
         },
-        [expression](bool lhs){
+                       [expression](bool lhs){
             switch (expression->op) {
                 case ast::UnaryOperator::NOT:
                     return Value{!lhs};
@@ -282,7 +282,7 @@ Value Interpreter::visitUnaryOperatorExpression(ast::UnaryOperatorExpression* ex
                     return Value{};
             }
         },
-        [](auto&&) {
+                       [](auto&&) {
             throw BadOperatorCall{"Failed to find operator overload"};
             return Value{};
         }
@@ -357,7 +357,7 @@ Value Interpreter::visitBlock(ast::Block *block) {
 
 Value Interpreter::visitIfStatement(ast::IfStatement* if_stat) {
     for (auto& block : if_stat->if_blocks) {
-        if (util::get<bool>(removeReference(visit(block.condition.get())))) {
+        if (util::get<bool>(decay(visit(block.condition.get())))) {
             if (std::holds_alternative<Returning>(visit(block.block.get()).getVariant())) {
                 return Returning{};
             } else {
@@ -374,7 +374,7 @@ Value Interpreter::visitIfStatement(ast::IfStatement* if_stat) {
 }
 
 Value Interpreter::visitWhileLoop(ast::WhileLoop* loop) {
-    while (util::get<bool>(removeReference(visit(loop->condition.get())))) {
+    while (util::get<bool>(decay(visit(loop->condition.get())))) {
         if (std::holds_alternative<Returning>(visit(loop->body.get()).getVariant())) {
             return Returning{};
         }
@@ -466,7 +466,7 @@ Value Interpreter::visitArrayExpression(ast::ArrayExpression *array) {
 Value Interpreter::convert(const Value& other, const ast::TypeIdentifier *type) const {
     Value ret_val;
     if (type && type->op == ast::TypeOperator::SUPERSET) {
-        return Superset{util::get<ComplexValue>(removeReference(other))};
+        return Superset{util::get<ComplexValue>(decay(other))};
     } else if (type && type->op == ast::TypeOperator::SUBSET) {
         return Value{};
     } else {
@@ -484,7 +484,7 @@ Value Interpreter::convert(const Value& other, const ast::TypeIdentifier *type) 
         }
         ret_val = ret_array;
     } else {
-        ret_val = removeReference(other);
+        ret_val = decay(other);
     }
     return ret_val;
 }
