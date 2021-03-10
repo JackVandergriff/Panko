@@ -80,7 +80,7 @@ void Interpreter::run() {
 const Value& Interpreter::decay(const Value& value) {
     return *util::visit(value,
         [](const Reference& ref){return &decay(*ref.getValue());},
-        [](const Superset& sup){return &decay(sup.getValue());},
+        [](const Superset& sup){return &(sup.getValue());},
         [&](const auto&){return &value;}
     );
 }
@@ -549,23 +549,30 @@ void Superset::setValue(const ComplexValue& new_value) {
         throw BadTypeConversion{"New value doesn't contain all aspects of subtype"};
     }
 
-    value.attributes = test_value.attributes;
+    ComplexValue& cv = util::get<ComplexValue>(*value);
+
+    cv.attributes = test_value.attributes;
     for (const auto& kv : new_value.attributes) {
-        auto iter = value.attributes.find(kv.first);
-        if (iter == value.attributes.end()) {
-            value.attributes.emplace(kv);
+        auto iter = cv.attributes.find(kv.first);
+        if (iter == cv.attributes.end()) {
+            cv.attributes.emplace(kv);
         } else {
-            value.attributes.at(kv.first) = kv.second;
+            cv.attributes.at(kv.first) = kv.second;
         }
     }
 }
 
-const ComplexValue &Superset::getValue() const {
-    return value;
+const Value& Superset::getValue() const {
+    return *value;
 }
 
 Superset &Superset::operator=(const Superset &other) {
     if (&other == this) return *this;
-    setValue(other.value);
+    setValue(util::get<ComplexValue>(*other.value));
+    return *this;
+}
+
+Superset &Superset::operator=(Superset&& other) {
+    *this = other;
     return *this;
 }

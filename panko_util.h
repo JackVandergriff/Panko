@@ -13,6 +13,7 @@
 #include <variant>
 #include <set>
 #include <map>
+#include <memory>
 
 namespace panko::ast {
     template<typename T> struct hash;
@@ -186,9 +187,9 @@ namespace panko::util {
     template<typename Variant, typename... Args>
     decltype(auto) visit(Variant&& variant, Args&&... lambdas) {
         if constexpr (IsInvariant<Variant>) {
-            return std::visit(visitor{std::forward<Args>(lambdas)...}, variant.variant);
+            return std::visit(visitor{std::forward<Args>(lambdas)...}, std::forward<decltype(variant)>(variant).variant);
         } else {
-            return std::visit(visitor{std::forward<Args>(lambdas)...}, std::forward<Variant>(variant));
+            return std::visit(visitor{std::forward<Args>(lambdas)...}, std::forward<decltype(variant)>(variant));
         }
     }
 
@@ -231,6 +232,33 @@ namespace panko::util {
     bool typeSuperset(const std::map<T1, T2>& lhs, const std::map<T1, T2>& rhs) {
         return typeSubset(rhs, lhs);
     }
+
+    template<typename T>
+    class deferred_ptr {
+    private:
+        std::unique_ptr<T> ptr;
+    public:
+        deferred_ptr()=default;
+        deferred_ptr(deferred_ptr&&) noexcept =default;
+        deferred_ptr& operator=(deferred_ptr&&) noexcept =default;
+
+        template<typename... Args>
+        explicit deferred_ptr(Args&&... args) : ptr{std::make_unique<T>(std::forward<Args>(args)...)} {}
+
+        deferred_ptr(const deferred_ptr& other) : ptr{std::make_unique<T>(*other.ptr)} {}
+        deferred_ptr& operator=(const deferred_ptr& other) {
+            ptr = std::make_unique<T>(*other.ptr);
+            return *this;
+        }
+
+        decltype(auto) operator*() const {
+            return *ptr;
+        }
+
+        decltype(auto) operator->() const {
+            return *ptr;
+        }
+    };
 }
 
 #endif //PANKO_UTIL_H

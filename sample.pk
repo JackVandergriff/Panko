@@ -58,4 +58,4 @@ tupleboi;
 
 int_wrap> superpoint = pp;
 superpoint;
-points[1] = {x: 100, y: 1000};
+points[1] = superpoint;

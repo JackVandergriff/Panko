@@ -91,17 +91,19 @@ namespace panko::runtime {
 
     class Superset {
     private:
-        ComplexValue value;
+        util::deferred_ptr<Value> value; // Stupid solution
         ComplexValue test_value;
     public:
         Superset()=default;
-        explicit Superset(ComplexValue test_value) : value{std::move(test_value)}, test_value{value} {};
+        explicit Superset(const ComplexValue& test_value) : value{test_value}, test_value{test_value} {};
 
         void setValue(const ComplexValue& new_value);
-        [[nodiscard]] const ComplexValue& getValue() const;
+        [[nodiscard]] const Value& getValue() const;
 
         Superset(const Superset&)=default;
         Superset& operator=(const Superset& other);
+        Superset(Superset&&)=default;
+        Superset& operator=(Superset&& other);
     };
 
     using WeakValue = std::remove_cvref_t<decltype(Value{}.getVariant())>; // Get the variant inside Value
