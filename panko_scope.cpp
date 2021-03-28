@@ -4,6 +4,8 @@
 
 #include "panko_scope.h"
 
+#include <numeric>
+
 using namespace panko::scope;
 using namespace panko;
 
@@ -11,21 +13,21 @@ void Context::pop() {
     context.pop_back();
 }
 
-void Context::push(const std::string& name) {
-    context.push_back(name);
+void Context::push(const std::string& name, ScopeType type) {
+    context.push_back(getScopeChar(type) + name);
 }
 
-void Context::push_unique(const std::string& name) {
-    context.push_back(name + std::to_string(id++));
+void Context::push_unique(const std::string& name, ScopeType type) {
+    context.push_back(getScopeChar(type) + name + std::to_string(id++));
 }
 
-util::Finally Context::push_local(const std::string& name) {
-    push(name);
+util::Finally Context::push_local(const std::string& name, ScopeType type) {
+    push(name, type);
     return util::Finally{[this](){pop();}};
 }
 
-util::Finally Context::push_unique_local(const std::string& name) {
-    push_unique(name);
+util::Finally Context::push_unique_local(const std::string& name, ScopeType type) {
+    push_unique(name, type);
     return util::Finally{[this](){pop();}};
 }
 
@@ -33,9 +35,22 @@ util::Finally Context::push_unique_local(const std::string& name) {
 [[nodiscard]] std::string Context::mangle(const std::string& name) const {
     std::string ret_val;
 
-    for (auto& scope : context) {
-        ret_val += scope + '.';
-    }
+    return std::accumulate(context.begin(), context.end(), std::string{}, [](const auto& lhs, const auto& rhs){
+        return lhs + rhs + '.';
+    }) + name;
+}
 
-    return ret_val + name;
+const std::vector<std::string> &Context::getContext() const {
+    return context;
+}
+
+char scope::getScopeChar(ScopeType scope) {
+    switch (scope) {
+        case ScopeType::FUNCTION:
+            return 'F';
+        case ScopeType::BLOCK:
+            return 'B';
+        case ScopeType::MODULE:
+            return 'M';
+    }
 }

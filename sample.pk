@@ -20,6 +20,18 @@ type line {
     bool direction;
 }
 
+5;
+4.0;
+false;
+null;
+int banana = 12;
+float bananaa = 12;
+banana;
+bananaa = banana;
+
+point_f p1 = {x: 12, y: banana};
+
+/*
 int bad_fib(int index) {
     if (index < 2) {
         return 1;
@@ -37,7 +49,7 @@ point get_vector(line vector) {
 }
 
 line l1 = {
-    p1 : {x: 0, y: 0},
+    p1 : {x: 10, y: 0},
     p2 : {x: 10, y: ~10},
     direction : false
 };
@@ -59,3 +71,4 @@ tupleboi;
 int_wrap> superpoint = pp;
 superpoint;
 points[1] = superpoint;
+*/

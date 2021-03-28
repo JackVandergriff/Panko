@@ -141,7 +141,7 @@ const ast::Function* Interpreter::findFunction(const ast::Identifier& id) const 
 Value Interpreter::constructValue(const ast::TypeIdentifier* type) const {
     if (!type) return Value{};
     switch (type->op) {
-        case ast::TypeOperator::BASIC: { // Need block to be able to initialize new variables (dumb)
+        case ast::TypeOperator::BASIC: {
             const auto actual = findType(type->id);
             if (actual->name == util::string_hash{"int"}) {
                 return Value{std::in_place_type<int>};

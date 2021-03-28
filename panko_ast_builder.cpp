@@ -5,12 +5,13 @@
 #include "panko_ast_builder.h"
 
 using namespace panko;
+using namespace panko::scope;
 
 antlrcpp::Any ASTBuilder::visitFile(PankoParser::FileContext *context) {
     auto file = new ast::File();
 
     file->module = context->IDENTIFIER()->getText();
-    auto pop = ast_context.push_local(file->module);
+    auto pop = ast_context.push_local(file->module, ScopeType::MODULE);
 
     for (auto& statement : context->statement()) {
         file->statements.push_back(make_unique_any<ast::Statement>(statement->accept(this)));
@@ -21,7 +22,7 @@ antlrcpp::Any ASTBuilder::visitFile(PankoParser::FileContext *context) {
 
 antlrcpp::Any ASTBuilder::visitBlock(PankoParser::BlockContext *context) {
     auto block = new ast::Block();
-    auto pop = ast_context.push_unique_local("B");
+    auto pop = ast_context.push_unique_local("", ScopeType::BLOCK);
     for (auto statement : context->statement()) {
         block->statements.push_back(make_unique_any<ast::Statement>(visit(statement)));
     }
@@ -40,7 +41,7 @@ antlrcpp::Any ASTBuilder::visitSemi_statement(PankoParser::Semi_statementContext
 antlrcpp::Any ASTBuilder::visitFunc_decl(PankoParser::Func_declContext *context) {
     auto decl = new ast::FunctionDeclaration();
     ast::Function func{ast_context.mangle(context->ret_type->IDENTIFIER()->getText())};
-    auto pop = ast_context.push_local(static_cast<std::string>(context->ret_type->IDENTIFIER()->getText()));
+    auto pop = ast_context.push_local(static_cast<std::string>(context->ret_type->IDENTIFIER()->getText()), ScopeType::FUNCTION);
     func.return_type = make_unique_any<ast::TypeIdentifier>(context->ret_type->type()->accept(this));
 
     if (!context->params.empty()) {

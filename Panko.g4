@@ -147,5 +147,8 @@ FLOATLIT
 COMMENT 
  : '//' ~[\r\n]* -> skip;
 
+MULTILINE_COMMENT
+ : '/*' .*? '*/' -> skip;
+
 SPACE
  : [ \t\r\n] -> skip;

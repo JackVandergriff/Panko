@@ -29,3 +29,7 @@ bool panko::util::operator==(const string_hash& lhs, const string_hash& rhs) {
 bool panko::util::operator<(const string_hash& lhs, const string_hash& rhs) {
     return lhs.hash < rhs.hash;
 }
+
+std::string string_hash::reverseHash(size_t hash) {
+    return hash_map.at(hash);
+}

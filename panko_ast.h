@@ -52,9 +52,7 @@ namespace panko::ast {
 
     struct Type {
         util::string_hash name;
-
         std::vector<Variable> attributes;
-        std::vector<Function> methods;
 
         Type() = default;
         explicit Type(const std::string& name): name{name} {}
@@ -121,7 +119,7 @@ namespace panko::ast {
     const static inline Type Integer{"int"};
     const static inline Type Float{"float"};
     const static inline Type Bool{"bool"};
-
+    const static inline Type Null{"null"};
 
     struct IntegerLiteral : Expression {
         int value{};

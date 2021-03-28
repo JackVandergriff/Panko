@@ -15,18 +15,25 @@ namespace panko::scope {
         using util::Exception::Exception;
     };
 
+    enum class ScopeType {
+        FUNCTION, BLOCK, MODULE
+    };
+
+    char getScopeChar(ScopeType scope);
+
     class Context {
     private:
         std::vector<std::string> context;
         static inline int id = 0;
     public:
         void pop();
-        void push(const std::string& name);
-        void push_unique(const std::string& name);
-        util::Finally push_local(const std::string& name);
-        util::Finally push_unique_local(const std::string& name);
+        void push(const std::string& name, ScopeType type);
+        void push_unique(const std::string& name, ScopeType type);
+        util::Finally push_local(const std::string& name, ScopeType type);
+        util::Finally push_unique_local(const std::string& name, ScopeType type);
 
         [[nodiscard]] std::string mangle(const std::string& name) const;
+        [[nodiscard]] const std::vector<std::string>& getContext() const;
 
         template<typename T>
         std::tuple<size_t, const T*> lookup(const std::string& name, const util::hasher<T>& hasher) const {

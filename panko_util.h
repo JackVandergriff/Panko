@@ -71,6 +71,7 @@ namespace panko::util {
         string_hash(const std::string& str);
         string_hash(const char* str);
         explicit operator std::string() const;
+        static std::string reverseHash(size_t hash);
 
         [[nodiscard]] size_t getHash() const;
 

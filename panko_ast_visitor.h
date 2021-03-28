@@ -115,7 +115,9 @@ namespace panko::ast {
         T visitVariableDeclaration(VariableDeclaration*) override { return T(); }
         T visitComplexAssignment(ComplexAssignment*) override { return T(); }
         T visitSimpleAssignment(SimpleAssignment*) override { return T(); }
+        T visitIfStatement(IfStatement*) override { return T(); }
         T visitWhileLoop(WhileLoop*) override { return T(); }
+        T visitReturnStatement(ReturnStatement*) override { return T(); }
         T visitFunctionDeclaration(FunctionDeclaration*) override { return T(); }
         T visitTypeDeclaration(TypeDeclaration*) override { return T(); }
         T visitAccessExpression(AccessExpression*) override { return T(); }

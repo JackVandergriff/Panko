@@ -5,6 +5,7 @@
 
 #include "panko_interpreter.h"
 #include "panko_ast_builder.h"
+#include "panko_type_checker.h"
 
 using namespace std;
 using namespace antlr4;
@@ -36,9 +37,12 @@ int main() {
     ASTBuilder builder;
     auto& ast = builder.appendFile(parser).getTree();
 
-    runtime::Interpreter interpreter{ast};
+    statics::TypeChecker tc{ast};
+    tc.visit(ast.files.at(0).get());
 
-    interpreter.run();
+    //runtime::Interpreter interpreter{ast};
+
+    //interpreter.run();
 
     return 0;
 }
