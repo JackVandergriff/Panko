@@ -19,6 +19,14 @@ namespace panko::statics {
         using Exception::Exception;
     };
 
+    struct ImproperExpression : util::Exception {
+        using Exception::Exception;
+    };
+
+    struct FailedSymbolResolution : util::Exception {
+        using Exception::Exception;
+    };
+
     enum class TypeCategory {
         INT, FLOAT, BOOL, NULL, OBJECT, REF, ARRAY, TUPLE, SUPERSET, SUBSET, CONJUNCTION, DISJUNCTION
     };
@@ -137,7 +145,45 @@ namespace panko::statics {
 
         Type visitVariableExpression(ast::VariableExpression* var) override {
             const auto* var_ptr = resolveVar(ast, var->variable);
+            if (!var_ptr) {
+                throw FailedSymbolResolution{"Variable does not exist"};
+            }
             return referenceTo(typeFromASTType(ast, var_ptr->type.get()));
+        }
+
+        Type visitIfStatement(ast::IfStatement* stat) override {
+            for (const auto& block : stat->if_blocks) {
+                if (visit(block.condition.get()).decay().category != TypeCategory::BOOL) {
+                    throw ImproperExpression{"Cannot use non-bool type in if statement"};
+                }
+                visit(block.block.get());
+            }
+            visit(stat->else_block.get());
+            return {};
+        }
+
+        Type visitWhileLoop(ast::WhileLoop* loop) override {
+            if (visit(loop->condition.get()).decay().category != TypeCategory::BOOL) {
+                throw ImproperExpression{"Cannot use non-bool type in while loop"};
+            }
+            visit(loop->body.get());
+            return {};
+        }
+
+        Type visitBlock(ast::Block* block) override {
+            for (const auto& statement : block->statements) {
+                visit(statement.get());
+            }
+            return {};
+        }
+
+        Type visitComplexAssignment(ast::ComplexAssignment* assn) override {
+            Type var = visit(assn->reference.get());
+            if (var.category != TypeCategory::REF) {
+                throw ImproperAssignment{"Cannot assign to non-reference type"};
+            }
+
+            return var.subtypes.at(0);
         }
     };
 }

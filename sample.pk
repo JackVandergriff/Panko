@@ -29,7 +29,13 @@ float bananaa = 12;
 banana;
 bananaa = banana;
 
-point_f p1 = {x: 12, y: banana};
+point p1 = {x: 12, y: banana};
+bool toggle = false;
+if (toggle) {
+    p1.z;
+} else {
+
+}
 
 /*
 int bad_fib(int index) {
