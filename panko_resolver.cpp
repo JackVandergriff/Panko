@@ -17,9 +17,10 @@ const ast::Variable* statics::resolveVar(const ast::AST &ast, const ast::Identif
     });
 
     if (func_it != context.rend()) {
-        const auto func_str = std::accumulate(context.begin(), func_it.base(), std::string{}, [](const auto& lhs, const auto& rhs){
+        // Accumulate context up until function name, then append function name sans initial 'F'
+        const auto func_str = std::accumulate(context.begin(), func_it.base() - 1, std::string{}, [](const auto& lhs, const auto& rhs){
            return lhs + rhs + '.';
-        });
+        }) + (func_it->data() + 1);
         const ast::Function* func_ptr = ast.functions.get(util::string_hash{func_str}.getHash());
 
         for (const auto& param : func_ptr->parameters) {

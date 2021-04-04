@@ -32,9 +32,15 @@ bananaa = banana;
 point p1 = {x: 12, y: banana};
 bool toggle = false;
 if (toggle) {
-    p1.z;
-} else {
+    p1.x = banana;
+}
 
+float return_one(float p1) {
+    if (toggle) {
+        return p1;
+    } else {
+        return 2;
+    }
 }
 
 /*

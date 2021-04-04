@@ -8,6 +8,8 @@
 #include "panko_ast_visitor.h"
 #include "panko_resolver.h"
 
+#include <stack>
+
 #undef NULL
 
 namespace panko::statics {
@@ -24,6 +26,10 @@ namespace panko::statics {
     };
 
     struct FailedSymbolResolution : util::Exception {
+        using Exception::Exception;
+    };
+
+    struct ImproperReturnType : util::Exception {
         using Exception::Exception;
     };
 
@@ -60,6 +66,7 @@ namespace panko::statics {
         explicit TypeChecker(const ast::AST& ast) : ast{ast} {}
     private:
         const ast::AST& ast;
+        std::stack<Type> return_types;
 
         Type visitFile(ast::File* file) override {
             for (const auto& statement : file->statements) {
@@ -119,7 +126,7 @@ namespace panko::statics {
                 }
             }
 
-            return object;
+            return referenceTo(object);
         }
 
         Type visitSimpleAssignment(ast::SimpleAssignment* assn) override {
@@ -184,6 +191,21 @@ namespace panko::statics {
             }
 
             return var.subtypes.at(0);
+        }
+
+        Type visitFunctionDeclaration(ast::FunctionDeclaration* decl) override {
+            const auto func = ast.functions.get(decl->function);
+            return_types.push(typeFromASTType(ast, func->return_type.get()));
+            visit(func->body.get());
+            return_types.pop();
+            return {};
+        }
+
+        Type visitReturnStatement(ast::ReturnStatement* ret) override {
+            if (!return_types.top().assignableFrom(visit(ret->expression.get()))) {
+                throw ImproperReturnType{"Cannot return from incompatible type"};
+            }
+            return {};
         }
     };
 }
